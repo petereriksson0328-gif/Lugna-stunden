@@ -81,7 +81,7 @@ När hon öppnar länken första gången kommer frågan **"Vill du spara appen p
 - **iPhone/iPad:** Apple tillåter inte att en webbsida installerar sig själv. "Ja" visar därför tre enkla steg via Dela-knappen → *Lägg till på hemskärmen*.
 - Svarar hon "Nej" frågar appen igen om 3 dagar. När appen väl är installerad visas frågan aldrig mer.
 
-Efter installationen fungerar appen även utan internet. **Om du ändrar i appen** behöver du höja `VERSION` i `sw.js` (t.ex. från `lugna-v3` till `lugna-v4`). Då hämtar telefonen den nya versionen. Den syns när appen öppnas nästa gång.
+Efter installationen fungerar appen även utan internet. **Om du ändrar i appen** behöver du höja `VERSION` i `sw.js` (t.ex. från `lugna-v3` till `lugna-v4`). Själva sidan hämtas alltid ny när telefonen har internet, så en ny version syns direkt när appen öppnas eller laddas om. Utan internet visas den sparade versionen.
 
 ## Publicera på GitHub Pages
 Appen publiceras automatiskt av GitHub Actions (`.github/workflows/pages.yml`).
