@@ -13,7 +13,8 @@ Appen ska göra vardagen lite lättare. Den ersätter inte vård (BUP eller tera
 - **Lova aldrig att hon inte kommer att må illa eller kräkas.** Vid emetofobi håller sådana försäkringar oron vid liv. Meddelanden ska i stället bygga förmågan att klara känslan: "pirr i magen är oro och inte farligt", "känslan går över som en våg", "även om du skulle må dåligt så klarar du det" och "ha en plan, säg till en vuxen".
 - Uppmuntra modiga små steg (exponering), till exempel med modiga stjärnor.
 - Ingen tidspress, inga poäng att förlora och inga stressande ljud eller animationer. Respektera `prefers-reduced-motion`.
-- **Säkerhet:** om text som hon skriver (i Berätta eller Oromolnet) innehåller allvarliga formuleringar, till exempel "vill dö", "vill inte leva", "skada mig" eller "skära mig", ska appen direkt visa en varm uppmaning att gå till en vuxen, BRIS 116 111 och 112 vid akut fara. Händelsen loggas så att föräldravyn kan visa en varning.
+- **Skriv aldrig ut självskada eller självmord i texter som hon ser** (meddelanden, välkomst, Om mig, förklaringar). All oro hänger inte ihop med sådana tankar, och att nämna dem i förväg kan skrämma eller plantera tankar. Krisrutan visas bara när hon själv har skrivit något allvarligt, och även den säger bara att det "låter väldigt tungt".
+- **Säkerhet:** om text som hon skriver (i Berätta eller Oromolnet) uttrycker vilja eller avsikt, till exempel "vill dö", "vill inte leva", "vill skada mig" eller "jag skär mig", ska appen direkt visa en varm uppmaning att gå till en vuxen, BRIS 116 111 och 112 vid akut fara. Händelsen loggas så att föräldravyn kan visa en varning. **Vanlig oro och vardagsuttryck får inte ge en varning** ("jag trodde jag skulle dö", "mamma kommer döda mig", "provet tar livet av mig", "jag skadade mig på gympan"). Testa med `node tests/analys.test.js`.
 
 ## Teknik (krav)
 - Ren HTML, CSS och JavaScript. **Inget ramverk, inget byggsteg.** All appkod ligger i `index.html`.

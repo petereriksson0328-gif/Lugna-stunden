@@ -29,6 +29,16 @@ const CASES = [
   ['jag  orkar inte   leva', [], true],
   ['Jag tänker på självmord', [], true],
   ['Jag är glad idag', [], false],
+  ['Jag vill skada mig själv', [], true],
+  ['jag tänker ta livet av mig', [], true],
+  /* Vanlig oro och vardagsuttryck ska INTE ge en varning */
+  ['Jag trodde att jag skulle dö när jag fick panik', [], false],
+  ['Jag är rädd att jag ska dö', [], false],
+  ['Mamma kommer döda mig om jag blir sen', ['familj', 'tid'], false],
+  ['Det här provet tar livet av mig', ['skola'], false],
+  ['Jag skadade mig på gympan', [], false],
+  ['Jag har skadat mig i foten', [], false],
+  ['Jag är rädd att skada mig på träningen', ['nytt'], false],
 ];
 
 let fail = 0;
