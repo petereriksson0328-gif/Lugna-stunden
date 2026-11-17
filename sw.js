@@ -1,7 +1,7 @@
 /* Lugna Stunden – service worker
    Gör att appen kan installeras och fungerar utan internet.
    Höj VERSION när du ändrar något, så hämtas nya filer. */
-const VERSION = 'lugna-v2';
+const VERSION = 'lugna-v3';
 const FILES = [
   './',
   './index.html',
