@@ -26,6 +26,7 @@ Din telefon frågar efter PIN varje gång appen öppnas. Har du redan använt ap
 ## Innehåll
 - **Dagens tanke** – ett positivt, lugnande meddelande (samma hela dagen, med en knapp för fler)
 - **Hur känns det idag?** – en enkel incheckning med ett vänligt svar
+- **🌬️ Lugna-knappen** – överst på startsidan, för när det känns jättejobbigt. Andningstriangeln startar direkt: en prick går runt en triangel (andas in 4 s, håll 2 s, andas ut långsamt 6 s). Efter 5 andetag frågar appen hur det känns. Om det fortfarande är jättejobbigt kommer nästa steg: kallt vatten över händerna, fötterna i golvet och vad hon kan säga till en vuxen. Knappen nås också från 😣 i humörkollen och från Berätta när känslan låter stark.
 - **Andas med bollen** – andning 4 s in, 2 s håll, 6 s ut
 - **Lugna bubblor** – bubblor som flyter sakta och går att poppa, utan poäng eller tidspress (mjukt ljud om man vill)
 - **5-4-3-2-1** – en sinnesövning för att landa i nuet
@@ -53,6 +54,7 @@ Namn, stjärnor och humör sparas bara lokalt i webbläsaren (localStorage). Ing
 
 Visar för 7 eller 30 dagar:
 - humör per dag och per veckodag (tyngsta dagen markeras)
+- **Lugna-knappen**: hur ofta den används, dag och klockslag, om det kändes bättre efteråt och när på dagen det oftast händer
 - vad oron handlar om (teman)
 - vilka övningar som hjälper enligt hennes egna svar
 - modiga stjärnor
