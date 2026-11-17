@@ -136,6 +136,11 @@
   .wdots{display:flex;justify-content:center;gap:6px;margin-top:14px}
   .wdots i{width:8px;height:8px;border-radius:50%;background:#e4e0f2;display:block}
   .wdots i.f{background:var(--a2)}
+  .code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:1.35rem;font-weight:800;letter-spacing:.08em;
+        text-align:center;background:#f4f2fb;border-radius:14px;padding:12px;margin:10px 0;user-select:all;-webkit-user-select:all}
+  .toast{position:fixed;left:16px;right:16px;bottom:96px;max-width:520px;margin:0 auto;background:#3b4a5a;color:#fff;
+         border-radius:16px;padding:12px 16px;text-align:center;z-index:60;display:none}
+  .toast.on{display:block;animation:fade .3s}
 
   /* Föräldravy */
   body.parent nav{display:none}
@@ -182,6 +187,7 @@
       </div>
       <div class="moodtxt" id="moodtxt"></div>
     </div>
+    <div id="sendNudge"></div>
 
     <h2 style="margin-top:22px">Välj något lugnt</h2>
     <div class="grid">
@@ -275,7 +281,8 @@
   <!-- FÖRÄLDRAVY (dold – nås via 5 snabba tryck på hälsningen + PIN) -->
   <section class="screen" id="s-parent">
     <h2>👪 Föräldravy</h2>
-    <p class="sub">Bara för dig. Allt här kommer från den här telefonen.</p>
+    <p class="sub" id="pSub">Bara för dig. Allt här kommer från den här telefonen.</p>
+    <div class="card" id="pTwo"></div>
     <div class="seg"><button data-p="7">7 dagar</button><button data-p="30" class="ghost">30 dagar</button></div>
     <div id="pAlert"></div>
     <div class="card"><div class="kpis" id="pKpis"></div></div>
@@ -316,7 +323,13 @@
       <b>Vad ser min förälder?</b>
       <p>Din förälder kan se hur ditt humör har varit, vilka saker du har berättat om (till exempel skolan eller magen), vilka övningar som hjälper dig och dina modiga stjärnor.</p>
       <p><b>Din dagbok är din.</b> Din förälder kan bara läsa inlägg som du själv har valt att dela. Det du skriver i Oromolnet sparas aldrig.</p>
+      <p>Om din förälder har appen på sin egen telefon skickas ingenting dit förrän <b>du</b> trycker på Skicka.</p>
       <p class="small">Om du skriver att du inte vill leva eller vill skada dig, får din förälder veta att du har haft det väldigt tungt den dagen, men inte vad du skrev. Det är för att du inte ska vara ensam med något så tungt.</p>
+    </div>
+    <div class="card" id="shareCard">
+      <b>📤 Dela med min förälder</b>
+      <div id="shareBody"></div>
+      <textarea id="sendBox" rows="5" style="display:none;margin-top:8px" readonly></textarea>
     </div>
     <div class="row" style="margin-top:6px"><button class="ghost" id="meParent" style="font-size:.85rem;padding:8px 16px">👪 För föräldrar</button></div>
   </section>
@@ -345,6 +358,8 @@
     <div class="row"><button id="pinOk">OK</button><button class="ghost" id="pinCancel">Avbryt</button></div>
   </div>
 </div>
+
+<div class="toast" id="toast" role="status"></div>
 
 <div class="fb" id="fb">
   <p>Kändes det lite bättre?</p>
@@ -462,7 +477,8 @@ function go(id){
   if(id==='bubbles') startBubbles(); else stopBubbles();
   if(id==='ground') resetGround();
   if(id==='stars') renderStars();
-  if(id==='me') document.getElementById('nameIn').value = store.get('name','');
+  if(id==='me'){ document.getElementById('nameIn').value = store.get('name',''); renderShare(); }
+  if(id==='home') renderNudge();
   if(id==='talk') renderDiary(); else stopRec();
   asked[id] = false;
 }
@@ -583,7 +599,7 @@ document.getElementById('worryGo').onclick=()=>{
   const wa = analyze(txt);
   logThemes(wa);   // bara tema och ev. varning sparas – aldrig själva texten
   if(wa.crisis){   // visas direkt, utan att vänta på molnet
-    document.getElementById('worryMsg').innerHTML = CRISIS_HTML;
+    document.getElementById('worryMsg').innerHTML = crisisHtml();
     setTimeout(()=>c.remove(),4400); return;
   }
   setTimeout(()=>{ c.remove();
@@ -700,10 +716,14 @@ function analyze(raw){
   };
 }
 /* ANALYS-SLUT */
-const CRISIS_HTML = `<div class="card crisis"><b>Det du skriver låter väldigt tungt. 💛</b>
+function crisisHtml(){
+  const paired = isPairedChild();
+  return `<div class="card crisis"><b>Det du skriver låter väldigt tungt. 💛</b>
   <p>Du ska inte behöva bära det här själv. Gå till din förälder eller en annan vuxen du litar på – nu direkt.</p>
   <p>Du kan också ringa <b>BRIS 116 111</b> (gratis). Om det är akut: ring <b>112</b>.</p>
+  ${paired ? `<div class="row" style="margin:4px 0 8px"><button class="sendNow">📤 Skicka till min förälder nu</button></div>` : ''}
   <p class="small">Din förälder får veta att du har haft det tungt i dag, men inte vad du skrev.</p></div>`;
+}
 function logThemes(a){
   const tl=store.get('themelog',[]); tl.push({d:Date.now(), c:a.cats, x:a.crisis?1:0}); store.set('themelog', tl.slice(-500));
 }
@@ -738,7 +758,7 @@ document.getElementById('talkGo').onclick = ()=>{
 };
 function renderTalk(a){
   const out=document.getElementById('talkOut'); let h="";
-  if(a.crisis) h += CRISIS_HTML;
+  if(a.crisis) h += crisisHtml();
   const labels = a.cats.map(c=>CATS[c].label);
   h += `<div class="card"><div class="reply">${labels.length
     ? "Tack för att du berättade. Det låter som att du känner oro för " + joinSv(labels) + ". Det är helt okej att känna så."
@@ -891,7 +911,11 @@ async function pinSubmit(){
   else { err.textContent = 'Fel kod'; $('pinIn').value=''; }
 }
 /* Lås automatiskt när appen läggs i bakgrunden */
-document.addEventListener('visibilitychange', ()=>{ if(document.hidden && parentOpen) go('home'); });
+document.addEventListener('visibilitychange', ()=>{
+  if(document.hidden && parentOpen) go('home');
+  /* På förälderns egen telefon frågar appen efter PIN när den öppnas igen */
+  else if(!document.hidden && isParentPhone() && setupDone() && !parentOpen && !$('pinBg').classList.contains('on')) openPin();
+});
 
 document.querySelectorAll('[data-p]').forEach(b => b.onclick = ()=>{
   pDays = +b.dataset.p;
@@ -911,12 +935,18 @@ function cap(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
 function hbar(lbl, val, max, n, col){
   return `<div class="hbar"><span class="lbl">${lbl}</span><span class="track"><span class="fill" style="display:block;width:${max?Math.max(4,val/max*100):0}%;${col?'background:'+col:''}"></span></span><span class="n">${n}</span></div>`;
 }
+/* På förälderns egen telefon kommer allt från den senast inlästa rapporten, annars från den här telefonen */
 function pData(){
-  const since = dayStart(Date.now()) - (pDays-1)*DAY, f = a => a.filter(x => x.d >= since);
+  const since = dayStart(Date.now()) - (pDays-1)*DAY, f = a => (a||[]).filter(x => x.d >= since);
+  if(isParentPhone()){
+    const r = store.get('remote', null) || {};
+    return { since, moods:f(r.moods), themes:f(r.themelog), fb:f(r.fblog), stars:r.stars||[], diary:f(r.diary) };
+  }
   return { since, moods:f(store.get('moods',[])), themes:f(store.get('themelog',[])), fb:f(store.get('fblog',[])),
            stars:store.get('stars',[]), diary:f(store.get('diary',[])) };
 }
 function renderParent(){
+  renderTwo();
   const D = pData(), avg = a => a.reduce((s,x)=>s+x.m,0)/a.length;
 
   // Varningar
@@ -1052,6 +1082,184 @@ document.getElementById('instYes').onclick = async ()=>{
   document.getElementById('instOk').onclick = hideInstall;
 };
 
+/* ---------- Två telefoner: krypterad rapport från barnet till föräldern ----------
+   Ingen server. Telefonerna kopplas ihop en gång med en kod som föräldern visar och barnet skriver in.
+   Av koden görs en nyckel (PBKDF2 → AES-GCM). Barnet skickar själv en krypterad rapport via
+   Meddelanden, WhatsApp eller liknande, och förälderns app läser in den.
+   Rapporten innehåller bara det som föräldravyn visar. Privata dagboksinlägg skickas bara som datum. */
+const PAIR_ABC = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";   // 32 tecken utan I, O, 0 och 1
+function isParentPhone(){ return store.get('role', '') === 'parent'; }
+function isPairedChild(){ return !isParentPhone() && !!store.get('paircode', null); }
+function pairCheck(s){ let a=0, b=0; for(let i=0;i<s.length;i++){ const v=PAIR_ABC.indexOf(s[i]); a=(a+v*(i+1))%32; b=(b*3+v+7)%32; } return PAIR_ABC[a]+PAIR_ABC[b]; }
+function newPairCode(){ const s = Array.from(crypto.getRandomValues(new Uint8Array(14)), x => PAIR_ABC[x%32]).join(''); return s + pairCheck(s); }
+/* Returnerar koden utan bindestreck, eller null om den är felskriven (de två sista tecknen är en kontrollsumma) */
+function cleanCode(raw){
+  const s = (raw||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+  return s.length===16 && [...s].every(c => PAIR_ABC.includes(c)) && pairCheck(s.slice(0,14))===s.slice(14) ? s : null;
+}
+function fmtCode(s){ return s.match(/.{4}/g).join('-'); }
+async function pairKey(code){
+  const enc = new TextEncoder(), base = await crypto.subtle.importKey('raw', enc.encode(code), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2', salt:enc.encode('lugna-stunden-par-v1'), iterations:150000, hash:'SHA-256'},
+    base, {name:'AES-GCM', length:256}, false, ['encrypt','decrypt']);
+}
+function toB64u(u){ let s=''; for(let i=0;i<u.length;i+=8192) s += String.fromCharCode.apply(null, u.subarray(i, i+8192));
+  return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
+function fromB64u(s){ const b = atob(s.replace(/-/g,'+').replace(/_/g,'/')), u = new Uint8Array(b.length);
+  for(let i=0;i<b.length;i++) u[i] = b.charCodeAt(i); return u; }
+async function sealReport(code, obj){
+  const key = await pairKey(code), iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM', iv}, key, new TextEncoder().encode(JSON.stringify(obj))));
+  const out = new Uint8Array(12 + ct.length); out.set(iv); out.set(ct, 12);
+  return 'LS1.' + toB64u(out);
+}
+async function openReport(code, text){
+  const m = (text||'').replace(/\s+/g,'').match(/LS1\.([A-Za-z0-9_-]+)/); if(!m) throw new Error('format');
+  const u = fromB64u(m[1]), key = await pairKey(code);
+  const pt = await crypto.subtle.decrypt({name:'AES-GCM', iv:u.slice(0,12)}, key, u.slice(12));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+function buildReport(){
+  const since = Date.now() - 60*DAY, f = a => a.filter(x => x.d >= since);
+  return { v:1, at:Date.now(), name:store.get('name',''),
+    moods:f(store.get('moods',[])), themelog:f(store.get('themelog',[])), fblog:f(store.get('fblog',[])),
+    stars:store.get('stars',[]),
+    diary:f(store.get('diary',[])).map(e => e.s ? {d:e.d, t:e.t, c:e.c, m:e.m, s:1} : {d:e.d, s:0}) };
+}
+
+let toastT = null;
+function toast(msg){ const t=$('toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove('on'), 3500); }
+
+/* Barnets sida: skicka rapporten */
+async function sendReport(){
+  const code = store.get('paircode', null); if(!code) return;
+  const name = store.get('name','');
+  let txt;
+  try{
+    txt = `💙 Rapport från Lugna Stunden${name ? ' ('+name+')' : ''}, ${fmt(Date.now(),{weekday:'long',day:'numeric',month:'long'})}\n`
+        + `Öppna Lugna Stunden → Föräldravy → Läs in rapport, och klistra in hela meddelandet.\n\n` + await sealReport(code, buildReport());
+  }catch(e){ toast('Det gick inte att göra i ordning rapporten just nu.'); return; }
+  const done = ()=>{ store.set('lastsent', Date.now()); renderShare(); renderNudge(); };
+  try{
+    if(navigator.share){ await navigator.share({text: txt}); done(); toast('Skickat! 💙'); return; }
+    await navigator.clipboard.writeText(txt); done();
+    toast('Kopierat! Klistra in det i ett meddelande till din förälder.');
+  }catch(e){
+    if(e && e.name === 'AbortError') return;   // hon ångrade sig – helt okej
+    go('me'); const box = $('sendBox'); box.value = txt; box.style.display = 'block'; box.select();
+    toast('Markera texten och skicka den till din förälder.'); done();
+  }
+}
+document.addEventListener('click', e => { if(e.target.closest && e.target.closest('.sendNow')) sendReport(); });
+
+function renderShare(){
+  const card = $('shareCard'), body = $('shareBody');
+  if(isParentPhone()){ card.style.display = 'none'; return; }
+  card.style.display = '';
+  const code = store.get('paircode', null);
+  if(!code){
+    body.innerHTML = `<p>Om din förälder har Lugna Stunden på sin egen telefon kan du skicka det som står under <b>Vad ser min förälder?</b> dit.</p>
+      <p class="small">Din förälder visar en kod i sin app. Skriv in den här:</p>
+      <input id="pairIn" placeholder="XXXX-XXXX-XXXX-XXXX" autocapitalize="characters" autocomplete="off" spellcheck="false" style="text-align:center;letter-spacing:.06em">
+      <p class="small" id="pairErr" style="color:#c0605a;min-height:1.2em"></p>
+      <div class="row"><button id="pairGo">Koppla ihop</button></div>`;
+    $('pairGo').onclick = ()=>{
+      const c = cleanCode($('pairIn').value);
+      if(!c){ $('pairErr').textContent = 'Koden stämmer inte. Kolla att alla tecken är rätt.'; return; }
+      store.set('paircode', c); store.set('pairedat', Date.now()); renderShare(); toast('Nu är ni ihopkopplade 💙');
+    };
+    return;
+  }
+  const last = store.get('lastsent', 0);
+  body.innerHTML = `<p class="small" style="margin:6px 0">Det du skickar är samma saker som står under <b>Vad ser min förälder?</b>: humör, vad du har berättat om, vad som hjälper och dina stjärnor. Dagboksinlägg skickas bara om du har delat dem. Allt är krypterat, så bara din förälders app kan läsa det.</p>
+    <div class="row"><button class="sendNow">📤 Skicka till min förälder</button></div>
+    <p class="small" style="text-align:center">${last ? 'Senast skickat: ' + fmt(last,{weekday:'long',day:'numeric',month:'long'}) : 'Inget skickat än.'}</p>
+    <div class="row"><button class="ghost" id="unpair" style="font-size:.8rem;padding:6px 14px">Koppla bort</button></div>`;
+  let arm = false;
+  $('unpair').onclick = function(){
+    if(!arm){ arm = true; this.textContent = 'Tryck igen för att koppla bort'; return; }
+    ['paircode','pairedat','lastsent'].forEach(k => store.set(k, null)); $('sendBox').style.display='none'; renderShare(); renderNudge();
+  };
+}
+
+/* En vänlig påminnelse på startsidan om det var en vecka sedan hon skickade */
+function renderNudge(){
+  const el = $('sendNudge');
+  const due = isPairedChild()
+    && Date.now() - (store.get('lastsent',0) || store.get('pairedat',0)) > 7*DAY
+    && Date.now() - store.get('nudgeNo',0) > 2*DAY;
+  el.innerHTML = due ? `<div class="card" style="text-align:center"><b>📤 Vill du skicka en uppdatering till din förälder?</b>
+      <p class="small" style="margin:6px 0 10px">Det var en vecka sedan sist. Du bestämmer själv.</p>
+      <div class="row"><button class="sendNow">Skicka</button><button class="ghost" id="nudgeNo">Inte nu</button></div></div>` : '';
+  if(due) $('nudgeNo').onclick = ()=>{ store.set('nudgeNo', Date.now()); renderNudge(); };
+}
+
+/* Förälderns sida: koppla ihop och läs in rapporter */
+let showCode = false;
+function renderTwo(){
+  const el = $('pTwo'), code = store.get('paircode', null);
+  if(isParentPhone()){
+    const r = store.get('remote', null);
+    $('pSub').textContent = r ? `Bara för dig. Från ${r.name ? (/[sxz]$/i.test(r.name) ? r.name : r.name+'s') : 'barnets'} telefon, rapport ${fmt(r.at,{weekday:'long',day:'numeric',month:'long'})} kl. ${new Date(r.at).toLocaleTimeString('sv-SE',{hour:'2-digit',minute:'2-digit'})}.`
+                              : 'Bara för dig. Här visas rapporter som ditt barn skickar.';
+    const old = r && Date.now() - r.at > 8*DAY;
+    el.innerHTML = `<b>📱 Rapporter från barnets telefon</b>
+      <p class="small" style="margin:4px 0 10px">${r ? (old ? 'Senaste rapporten är mer än en vecka gammal.' : 'Allt nedan kommer från den senaste rapporten.') : 'Ingen rapport inläst än. När ditt barn skickar en rapport kopierar du hela meddelandet och läser in det här.'}</p>
+      <div class="row"><button id="pImportBtn">📥 Läs in rapport</button><button class="ghost" id="pCodeBtn">${showCode ? 'Dölj kopplingskod' : '🔗 Kopplingskod'}</button></div>
+      <textarea id="pImport" rows="4" style="display:none;margin-top:10px" placeholder="Klistra in hela meddelandet här"></textarea>
+      <div class="row" id="pImportRow" style="display:none;margin-top:8px"><button id="pImportGo">Läs in</button></div>
+      <p class="small" id="pTwoMsg" style="text-align:center;min-height:1.2em"></p>
+      ${showCode ? `<div class="code">${fmtCode(code)}</div>
+        <p class="small">Skriv in koden på barnets telefon under <b>🙂 Jag → Dela med min förälder</b>. Koden är nyckeln som krypterar rapporterna, så dela den inte med någon annan.</p>
+        <div class="row"><button class="ghost" id="pNewCode" style="font-size:.8rem;padding:6px 14px">Skapa ny kod</button></div>` : ''}`;
+    $('pCodeBtn').onclick = ()=>{ showCode = !showCode; renderTwo(); };
+    $('pImportBtn').onclick = async ()=>{
+      try{ const t = await navigator.clipboard.readText(); if(/LS1\./.test(t)){ await importReport(t); return; } }catch(e){}
+      $('pImport').style.display = 'block'; $('pImportRow').style.display = 'flex'; $('pImport').focus();
+      $('pTwoMsg').textContent = 'Klistra in meddelandet och tryck Läs in.';
+    };
+    $('pImportGo').onclick = ()=> importReport($('pImport').value);
+    if(showCode){ let arm=false; $('pNewCode').onclick = function(){
+      if(!arm){ arm=true; this.textContent='Tryck igen. Barnet måste då koppla om.'; return; }
+      store.set('paircode', newPairCode()); renderTwo(); }; }
+    return;
+  }
+  /* På barnets telefon */
+  $('pSub').textContent = 'Bara för dig. Allt här kommer från den här telefonen.';
+  el.innerHTML = `<b>📱 Följ på din egen telefon</b>
+    ${code ? `<p class="small">Den här telefonen är ihopkopplad med föräldratelefonen. Ditt barn skickar rapporter under <b>🙂 Jag → Dela med min förälder</b>.</p>`
+           : `<p class="small">Öppna appen på din egen telefon och välj <b>Jag är förälder → Min egen telefon</b>. Skriv sedan in koden som visas där, här eller i barnets app under 🙂 Jag.</p>
+              <input id="pPairIn" placeholder="XXXX-XXXX-XXXX-XXXX" autocapitalize="characters" autocomplete="off" spellcheck="false" style="text-align:center;letter-spacing:.06em">
+              <div class="row" style="margin-top:8px"><button id="pPairGo">Koppla ihop</button></div>`}
+    <p class="small" id="pTwoMsg" style="text-align:center;min-height:1.2em"></p>
+    <div class="row"><button class="ghost" id="pMakeParent" style="font-size:.8rem;padding:6px 14px">Gör den här till föräldratelefon</button></div>`;
+  if(!code) $('pPairGo').onclick = ()=>{
+    const c = cleanCode($('pPairIn').value);
+    if(!c){ $('pTwoMsg').textContent = 'Koden stämmer inte. Kolla att alla tecken är rätt.'; return; }
+    store.set('paircode', c); store.set('pairedat', Date.now()); renderTwo();
+  };
+  let arm = false;
+  $('pMakeParent').onclick = function(){
+    if(!arm){ arm = true; this.textContent = 'Säker? Tryck igen. Använd bara på din egen telefon.'; return; }
+    makeParentPhone(); renderParent();
+  };
+}
+function makeParentPhone(){
+  store.set('role', 'parent');
+  if(!cleanCode(store.get('paircode', null))) store.set('paircode', newPairCode());
+  showCode = !store.get('remote', null);
+}
+async function importReport(text){
+  let r;
+  try{ r = await openReport(store.get('paircode', null), text); if(!r || r.v !== 1) throw new Error('v'); }
+  catch(e){ renderParent(); $('pTwoMsg').textContent = e.message === 'format'
+      ? 'Hittade ingen rapport i texten. Kopiera hela meddelandet och försök igen.'
+      : 'Rapporten kunde inte läsas. Kontrollera att telefonerna är ihopkopplade med samma kod.'; return; }
+  const old = store.get('remote', null);
+  if(old && r.at < old.at){ renderParent(); $('pTwoMsg').textContent = 'Den här rapporten är äldre än den du redan har.'; return; }
+  store.set('remote', r); showCode = false; renderParent(); $('pTwoMsg').textContent = 'Rapporten är inläst 💙';
+}
+
 /* ---------- Namn ---------- */
 document.getElementById('saveName').onclick=()=>{ store.set('name', document.getElementById('nameIn').value.trim()); greet(); go('home'); };
 
@@ -1071,6 +1279,9 @@ function showWelcome(step){
       <div class="steps">Så kommer du in i föräldravyn senare:<br>• tryck snabbt <b>5 gånger</b> på hälsningen högst upp, eller<br>• gå till <b>🙂 Jag</b> → <b>För föräldrar</b><br>och skriv din PIN-kod.</div>
       <p class="small">Lämna sedan över telefonen. Ditt barn får en egen välkomst, där det också står vad du kan se.</p>
       <div class="row"><button id="wNext">Lämna över 💙</button></div>`,
+    device: `<div class="wic">📱</div><h3>Vems telefon är det här?</h3>
+      <div class="wchoice"><button id="wChildPhone">🙂 Mitt barns telefon</button><button class="ghost" id="wOwnPhone">👪 Min egen telefon</button></div>
+      <p class="small" style="margin-top:12px">På din egen telefon läser du in rapporter som ditt barn skickar till dig. Ingenting skickas utan att barnet själv trycker på Skicka.</p>`,
     name: `<div class="wic">🙂</div><h3>Hej! Vad heter du?</h3>
       <p class="sub" style="margin:0 0 10px">Då kan appen hälsa på dig.</p>
       <input id="wName" maxlength="30" placeholder="Ditt namn" value="${name}">
@@ -1090,7 +1301,11 @@ function showWelcome(step){
   if(nm){ nm.onkeydown = e=>{ if(e.key==='Enter') nx.click(); }; if(step==='name') setTimeout(()=>nm.focus(), 200); }
   if(step==='role'){
     $('wKid').onclick = ()=> showWelcome('name');
-    $('wParent').onclick = ()=>{ wBg.classList.remove('on'); pinAfter = ()=> showWelcome('parent'); openPin(); };
+    $('wParent').onclick = ()=>{ wBg.classList.remove('on'); pinAfter = ()=> showWelcome('device'); openPin(); };
+  }
+  if(step==='device'){
+    $('wChildPhone').onclick = ()=> showWelcome('parent');
+    $('wOwnPhone').onclick = ()=>{ makeParentPhone(); store.set('setup', 1); wBg.classList.remove('on'); parentOpen = true; go('parent'); setTimeout(maybeInstall, 2500); };
   }
   if(step==='parent') nx.onclick = ()=>{ saveNm(); showWelcome('name'); };
   if(step==='name'){ nx.onclick = ()=>{ saveNm(); showWelcome('how'); }; $('wSkip').onclick = ()=> showWelcome('how'); }
@@ -1099,7 +1314,8 @@ function showWelcome(step){
 }
 
 /* ---------- Start ---------- */
-greet(); showMsg(msgIndex); renderInsight();
+greet(); showMsg(msgIndex); renderInsight(); renderNudge();
+if(setupDone() && isParentPhone()) setTimeout(()=> openPin(), 400);   // förälderns telefon öppnar direkt till PIN
 if(!setupDone()){
   /* Den som redan har använt appen slipper välkomsten */
   if(store.get('name','') || store.get('moods',[]).length || store.get('diary',[]).length) store.set('setup', 1);

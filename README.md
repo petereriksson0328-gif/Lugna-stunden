@@ -9,6 +9,20 @@ Första gången appen öppnas får man välja **🙂 Jag är barnet** eller **�
 
 Installationsfrågan visas först när välkomsten är klar. Den som redan har använt appen slipper välkomsten.
 
+## Två telefoner (barnets och förälderns)
+Appen kan användas på två telefoner utan server och utan konto.
+
+1. **På din telefon:** öppna appen, välj **Jag är förälder**, välj PIN-kod och sedan **Min egen telefon**. Appen visar en kopplingskod, till exempel `MHXS-WABG-ZYQC-YCLM`.
+2. **På hennes telefon:** under **🙂 Jag → Dela med min förälder** skriver hon in koden. (Du kan också skriva in den i föräldravyn på hennes telefon.)
+3. **När hon vill** trycker hon **📤 Skicka till min förälder**. Appen öppnar telefonens dela-meny, och hon skickar rapporten via Meddelanden, WhatsApp eller liknande. Om det har gått en vecka får hon en vänlig påminnelse, som hon kan svara "Inte nu" på. I krisrutan finns också knappen "Skicka till min förälder nu".
+4. **På din telefon:** kopiera hela meddelandet, öppna föräldravyn och tryck **📥 Läs in rapport**.
+
+Rapporten är krypterad (AES-GCM med en nyckel som görs av kopplingskoden), så den kan bara läsas av en app som har samma kod. Den innehåller samma saker som föräldravyn visar: humör, teman, vad som hjälper, stjärnor, varningar och de dagboksinlägg hon har delat. Privata dagboksinlägg skickas bara som datum, aldrig text. Ingenting skickas utan att hon själv trycker.
+
+> Varningar kommer bara fram när hon skickar en rapport. Appen ersätter inte att hon går till en vuxen. Därför visar krisrutan alltid BRIS och 112.
+
+Din telefon frågar efter PIN varje gång appen öppnas. Har du redan använt appen på din telefon som "barn" kan du byta: öppna föräldravyn och tryck **Gör den här till föräldratelefon**.
+
 ## Innehåll
 - **Dagens tanke** – ett positivt, lugnande meddelande (samma hela dagen, med en knapp för fler)
 - **Hur känns det idag?** – en enkel incheckning med ett vänligt svar
@@ -27,7 +41,7 @@ Installationsfrågan visas först när välkomsten är klar. Den som redan har a
 ### Om röstinmatning
 Appen använder webbläsarens inbyggda taligenkänning. I Chrome skickas ljudet till Google för att göras om till text. På iPhone används Apples taligenkänning. Om funktionen saknas visas ett tips om att använda mikrofonen på tangentbordet i stället. All analys och inlärning sker lokalt i appen, och ingen AI-tjänst används.
 
-Namn, stjärnor och humör sparas bara lokalt i webbläsaren (localStorage). Inget skickas någonstans.
+Namn, stjärnor och humör sparas bara lokalt i webbläsaren (localStorage). Inget skickas någonstans, förutom den krypterade rapport som hon själv kan välja att skicka till din telefon.
 
 ## Föräldravy (dold)
 **Öppna:** tryck snabbt **5 gånger på hälsningen** ("God morgon, …!") högst upp på startsidan, eller gå till **🙂 Jag → För föräldrar**. Skriv sedan din PIN-kod. Om ingen PIN-kod finns än väljer du en där.
