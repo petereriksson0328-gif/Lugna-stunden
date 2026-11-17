@@ -37,6 +37,12 @@ tests/analys.test.js   test av textanalysen (node tests/analys.test.js)
 
 ## Funktioner som ska finnas
 
+### Första starten
+- Först väljer man **Jag är barnet** eller **Jag är förälder**.
+- Förälder: skapa PIN, skriv barnets namn (valfritt), få veta hur man loggar in igen, lämna över telefonen. Därefter barnets välkomst.
+- Barn: välkomst i tre steg (namn, hur appen fungerar, "Det här är ditt"). Klar → `setup` = 1.
+- Installationsfrågan visas först när välkomsten är klar. Befintliga användare (namn, humör eller dagbok finns) hoppar över välkomsten.
+
 ### För dottern
 1. **Hem**
    - hälsning efter tid på dygnet, med hennes namn
@@ -64,7 +70,7 @@ tests/analys.test.js   test av textanalysen (node tests/analys.test.js)
 10. **Om mig:** namn, kort info om oro och BRIS, och rutan "Vad ser min förälder?" som öppet beskriver vad föräldravyn visar.
 
 ### Dold föräldravy
-- Öppnas med **5 snabba tryck på hälsningen** och PIN-kod (4–6 siffror, SHA-256 med slumpat salt per enhet i `pinsalt`). Det finns ingen synlig knapp.
+- Öppnas med **5 snabba tryck på hälsningen**, eller knappen "För föräldrar" under Om mig, och PIN-kod (4–6 siffror, SHA-256 med slumpat salt per enhet i `pinsalt`).
 - Låses automatiskt vid `visibilitychange`. `#nollstall-pin` i adressen nollställer PIN-koden.
 - Visar för 7 eller 30 dagar:
   - nyckeltal
@@ -78,7 +84,7 @@ tests/analys.test.js   test av textanalysen (node tests/analys.test.js)
 - "Kopiera sammanfattning": en text **utan dagbokstexter** som kan delas med BUP eller en terapeut.
 
 ### localStorage-nycklar (prefix `ls_`)
-`name`, `moods` [{d,m}], `diary` [{d,t,c,m,s}] (s=1 om delad med föräldern), `themelog` [{d,c,x}], `fblog` [{d,e,v}], `w` (inlärningspoäng {tema:{övning:poäng}}, inkl. `allt`), `ctx` (senaste teman), `stars` [{t,d}], `pin` (hash), `pinsalt`, `installNo`
+`name`, `moods` [{d,m}], `diary` [{d,t,c,m,s}] (s=1 om delad med föräldern), `themelog` [{d,c,x}], `fblog` [{d,e,v}], `w` (inlärningspoäng {tema:{övning:poäng}}, inkl. `allt`), `ctx` (senaste teman), `stars` [{t,d}], `pin` (hash), `pinsalt`, `installNo`, `setup` (1 när välkomsten är klar)
 
 ## Uppgift nu
 1. Läs igenom mitt repository och jämför det med specifikationen ovan.

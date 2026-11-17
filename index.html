@@ -130,6 +130,12 @@
   .install .row button{min-width:110px}
   .steps{text-align:left;background:#f4f2fb;border-radius:16px;padding:14px 16px;margin:12px 0;line-height:1.7}
   .steps b{white-space:nowrap}
+  .wic{font-size:2.6rem;line-height:1}
+  .wchoice{display:grid;gap:10px;margin-top:6px}
+  .wchoice button{padding:16px;font-size:1.1rem}
+  .wdots{display:flex;justify-content:center;gap:6px;margin-top:14px}
+  .wdots i{width:8px;height:8px;border-radius:50%;background:#e4e0f2;display:block}
+  .wdots i.f{background:var(--a2)}
 
   /* Föräldravy */
   body.parent nav{display:none}
@@ -312,6 +318,7 @@
       <p><b>Din dagbok är din.</b> Din förälder kan bara läsa inlägg som du själv har valt att dela. Det du skriver i Oromolnet sparas aldrig.</p>
       <p class="small">Om du skriver att du inte vill leva eller vill skada dig, får din förälder veta att du har haft det väldigt tungt den dagen, men inte vad du skrev. Det är för att du inte ska vara ensam med något så tungt.</p>
     </div>
+    <div class="row" style="margin-top:6px"><button class="ghost" id="meParent" style="font-size:.85rem;padding:8px 16px">👪 För föräldrar</button></div>
   </section>
 </div>
 
@@ -322,6 +329,10 @@
     <p class="sub" style="margin:0 0 16px">Då kan du öppna Lugna Stunden direkt från telefonen, precis som en vanlig app.</p>
     <div class="row"><button id="instYes">Ja 💙</button><button class="ghost" id="instNo">Nej tack</button></div>
   </div>
+</div>
+
+<div class="install-bg" id="welcomeBg">
+  <div class="install" id="welcomeBox"></div>
 </div>
 
 <div class="install-bg" id="pinBg">
@@ -814,6 +825,7 @@ document.getElementById('newMsg').onclick = ()=>{
 /* ---------- Föräldravy ---------- */
 var parentOpen = false;
 let pDays = 7, pinMode = 'check', pinFirst = null, taps = [];
+let pinAfter = null;   // vad som händer efter rätt PIN under första starten (i stället för att öppna föräldravyn)
 const DAY = 864e5, WD = ["Sön","Mån","Tis","Ons","Tor","Fre","Lör"];
 const WDL = ["söndagar","måndagar","tisdagar","onsdagar","torsdagar","fredagar","lördagar"];
 const MCOL = ["#7cc6a0","#a8dcc0","#ffd6a5","#f6b38e","#ee9b9b"];
@@ -853,7 +865,13 @@ function setPinText(){
   $('pinTitle').textContent = t[0]; $('pinSub').textContent = t[1];
 }
 function closePin(){ $('pinBg').classList.remove('on'); $('pinIn').blur(); }
-$('pinCancel').onclick = closePin;
+$('pinCancel').onclick = ()=>{ closePin(); if(pinAfter){ pinAfter = null; showWelcome('role'); } };
+$('meParent').onclick = ()=> openPin();
+function pinSuccess(){
+  closePin();
+  if(pinAfter){ const f = pinAfter; pinAfter = null; f(); return; }
+  parentOpen = true; go('parent');
+}
 $('pinIn').addEventListener('keydown', e=>{ if(e.key==='Enter') pinSubmit(); });
 $('pinOk').onclick = pinSubmit;
 async function pinSubmit(){
@@ -863,12 +881,12 @@ async function pinSubmit(){
   if(pinMode==='confirm'){
     if(v!==pinFirst){ pinMode='new'; setPinText(); $('pinIn').value=''; err.textContent='Koderna var olika – försök igen'; return; }
     const salt = newSalt(); store.set('pinsalt', salt); store.set('pin', await hashPin(v, salt));
-    closePin(); parentOpen=true; go('parent'); return;
+    pinSuccess(); return;
   }
   const salt = store.get('pinsalt', null);
   if(await hashPin(v, salt) === store.get('pin', null)){
     if(!salt){ const ns = newSalt(); store.set('pinsalt', ns); store.set('pin', await hashPin(v, ns)); } // flytta gammal PIN till slumpat salt
-    closePin(); parentOpen=true; go('parent');
+    pinSuccess();
   }
   else { err.textContent = 'Fel kod'; $('pinIn').value=''; }
 }
@@ -996,7 +1014,7 @@ let deferredPrompt = null, installShown = false;
 const instBg = document.getElementById('installBg');
 
 function shouldAsk(){
-  if(isStandalone()) return false;
+  if(isStandalone() || !setupDone()) return false;   // vänta tills välkomsten är klar
   const no = store.get('installNo', 0);
   return Date.now() - no > 3*24*3600e3;          // efter "Nej" frågar vi igen om 3 dagar
 }
@@ -1008,7 +1026,8 @@ window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferred
 window.addEventListener('appinstalled', ()=>{ hideInstall(); deferredPrompt = null; });
 
 /* iPhone och övriga: visa frågan efter en liten stund, sedan instruktioner */
-window.addEventListener('load', ()=> setTimeout(()=>{ if(!deferredPrompt && (isIOS || /android/i.test(ua))) showInstall(); }, 2500));
+function maybeInstall(){ if(deferredPrompt || isIOS || /android/i.test(ua)) showInstall(); }
+window.addEventListener('load', ()=> setTimeout(maybeInstall, 2500));
 
 document.getElementById('instNo').onclick = ()=>{ store.set('installNo', Date.now()); hideInstall(); };
 document.getElementById('instYes').onclick = async ()=>{
@@ -1036,11 +1055,56 @@ document.getElementById('instYes').onclick = async ()=>{
 /* ---------- Namn ---------- */
 document.getElementById('saveName').onclick=()=>{ store.set('name', document.getElementById('nameIn').value.trim()); greet(); go('home'); };
 
+/* ---------- Första starten: barn eller förälder, sedan välkomst ---------- */
+function setupDone(){ return !!store.get('setup', 0); }
+function showWelcome(step){
+  const wBg = $('welcomeBg'), wBox = $('welcomeBox'), name = escapeHtml(store.get('name',''));
+  const KID = ['name','how','mine'], dots = KID.includes(step)
+    ? `<div class="wdots">${KID.map(s=>`<i class="${s===step?'f':''}"></i>`).join('')}</div>` : '';
+  const V = {
+    role: `<div class="wic">💙</div><h3>Välkommen till Lugna Stunden</h3>
+      <p class="sub" style="margin:0 0 12px">Vem använder appen just nu?</p>
+      <div class="wchoice"><button id="wKid">🙂 Jag är barnet</button><button class="ghost" id="wParent">👪 Jag är förälder</button></div>`,
+    parent: `<div class="wic">👪</div><h3>Nu är du inloggad som förälder</h3>
+      <p class="sub" style="margin:0 0 10px">Vad heter ditt barn? Hon kan ändra namnet själv senare.</p>
+      <input id="wName" maxlength="30" placeholder="Barnets namn" value="${name}">
+      <div class="steps">Så kommer du in i föräldravyn senare:<br>• tryck snabbt <b>5 gånger</b> på hälsningen högst upp, eller<br>• gå till <b>🙂 Jag</b> → <b>För föräldrar</b><br>och skriv din PIN-kod.</div>
+      <p class="small">Lämna sedan över telefonen. Ditt barn får en egen välkomst, där det också står vad du kan se.</p>
+      <div class="row"><button id="wNext">Lämna över 💙</button></div>`,
+    name: `<div class="wic">🙂</div><h3>Hej! Vad heter du?</h3>
+      <p class="sub" style="margin:0 0 10px">Då kan appen hälsa på dig.</p>
+      <input id="wName" maxlength="30" placeholder="Ditt namn" value="${name}">
+      <div class="row" style="margin-top:14px"><button id="wNext">Nästa</button><button class="ghost" id="wSkip">Hoppa över</button></div>`,
+    how: `<div class="wic">🌿</div><h3>Så här fungerar Lugna Stunden</h3>
+      <div class="steps">✨ Varje dag finns en tanke till dig.<br>🫧 Andas, bubblor och 5-4-3-2-1 hjälper kroppen att landa.<br>🎙️ Under <b>Berätta</b> kan du prata eller skriva hur du känner.<br>⭐ Samla modiga stjärnor för saker du har vågat.</div>
+      <p class="small">Det finns inga fel svar och ingen brådska.</p>
+      <div class="row"><button id="wNext">Nästa</button></div>`,
+    mine: `<div class="wic">🔒</div><h3>Det här är ditt</h3>
+      <div class="steps">Din förälder kan se hur ditt humör har varit, vad du har berättat om (till exempel skolan) och vad som hjälper dig.<br><br><b>Din dagbok är din.</b> Din förälder kan bara läsa det du själv väljer att dela. Det du skriver i Oromolnet sparas aldrig.</div>
+      <p class="small">Om du skriver något som låter som att du inte vill leva eller vill skada dig, får din förälder veta att du har haft det tungt den dagen, men inte vad du skrev.</p>
+      <div class="row"><button id="wNext">Då kör vi 💙</button></div>`
+  };
+  wBox.innerHTML = V[step] + dots; wBg.classList.add('on');
+  const nx = $('wNext'), nm = $('wName');
+  const saveNm = ()=>{ const v = nm.value.trim(); if(v) store.set('name', v); greet(); };
+  if(nm){ nm.onkeydown = e=>{ if(e.key==='Enter') nx.click(); }; if(step==='name') setTimeout(()=>nm.focus(), 200); }
+  if(step==='role'){
+    $('wKid').onclick = ()=> showWelcome('name');
+    $('wParent').onclick = ()=>{ wBg.classList.remove('on'); pinAfter = ()=> showWelcome('parent'); openPin(); };
+  }
+  if(step==='parent') nx.onclick = ()=>{ saveNm(); showWelcome('name'); };
+  if(step==='name'){ nx.onclick = ()=>{ saveNm(); showWelcome('how'); }; $('wSkip').onclick = ()=> showWelcome('how'); }
+  if(step==='how') nx.onclick = ()=> showWelcome('mine');
+  if(step==='mine') nx.onclick = ()=>{ store.set('setup', 1); wBg.classList.remove('on'); greet(); setTimeout(maybeInstall, 1500); };
+}
+
 /* ---------- Start ---------- */
 greet(); showMsg(msgIndex); renderInsight();
-if(!store.get('name','')) setTimeout(()=>{ /* första gången: be om namn mjukt */
-  document.getElementById('moodtxt').innerHTML = "Tips: tryck på <b>🙂 Jag</b> nere till höger och skriv ditt namn!";
-}, 1200);
+if(!setupDone()){
+  /* Den som redan har använt appen slipper välkomsten */
+  if(store.get('name','') || store.get('moods',[]).length || store.get('diary',[]).length) store.set('setup', 1);
+  else setTimeout(()=> showWelcome('role'), 400);
+}
 </script>
 </body>
 </html>
