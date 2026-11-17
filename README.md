@@ -2,6 +2,13 @@
 
 En lugn liten webbapp för barn (ca 10–14 år) som kämpar med oro. Den är gjord för att öppnas på morgonen eller inför något som känns pirrigt.
 
+## Första starten
+Första gången appen öppnas får man välja **🙂 Jag är barnet** eller **👪 Jag är förälder**.
+- **Förälder:** välj en PIN-kod (4–6 siffror) och skriv gärna barnets namn. Lämna sedan över telefonen.
+- **Barn:** en kort välkomst i tre steg: namn, hur appen fungerar och *Det här är ditt* (vad föräldern kan se).
+
+Installationsfrågan visas först när välkomsten är klar. Den som redan har använt appen slipper välkomsten.
+
 ## Innehåll
 - **Dagens tanke** – ett positivt, lugnande meddelande (samma hela dagen, med en knapp för fler)
 - **Hur känns det idag?** – en enkel incheckning med ett vänligt svar
@@ -23,7 +30,7 @@ Appen använder webbläsarens inbyggda taligenkänning. I Chrome skickas ljudet 
 Namn, stjärnor och humör sparas bara lokalt i webbläsaren (localStorage). Inget skickas någonstans.
 
 ## Föräldravy (dold)
-**Öppna:** tryck snabbt **5 gånger på hälsningen** ("God morgon, …!") högst upp på startsidan. Första gången väljer du en PIN-kod (4–6 siffror).
+**Öppna:** tryck snabbt **5 gånger på hälsningen** ("God morgon, …!") högst upp på startsidan, eller gå till **🙂 Jag → För föräldrar**. Skriv sedan din PIN-kod. Om ingen PIN-kod finns än väljer du en där.
 
 Visar för 7 eller 30 dagar:
 - humör per dag och per veckodag (tyngsta dagen markeras)
