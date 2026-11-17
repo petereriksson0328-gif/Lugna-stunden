@@ -97,7 +97,8 @@
            padding:16px;display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start;color:#fff}
   .star{font-size:1.6rem;cursor:pointer;animation:tw 3s infinite ease-in-out}
   @keyframes tw{50%{opacity:.6;transform:scale(.9)}}
-  .starnote{color:#fff;background:#ffffff22;border-radius:12px;padding:10px;margin-top:10px;display:none}
+  .starnote{color:var(--ink);background:#fff;border-radius:14px;padding:12px 14px;margin-top:10px;display:none;box-shadow:0 3px 10px #6a7fa014}
+  .backbtn{font-size:.85rem;padding:7px 14px;margin:0 0 6px}
   .list{list-style:none;padding:0;margin:0}
   .list li{padding:8px 0;border-bottom:1px solid #eef0f6;color:var(--soft);font-size:.9rem}
 
@@ -251,6 +252,7 @@
 
   <!-- ANDAS -->
   <section class="screen" id="s-breath">
+    <button class="ghost backbtn" data-back>← Tillbaka</button>
     <h2>🫧 Andas med bollen</h2>
     <p class="sub">Andas in när bollen växer, och sakta ut när den krymper. Utandningen är lite längre – det är den som lugnar kroppen.</p>
     <div class="card">
@@ -262,6 +264,7 @@
 
   <!-- BUBBLOR -->
   <section class="screen" id="s-bubbles">
+    <button class="ghost backbtn" data-back>← Tillbaka</button>
     <h2>🎈 Lugna bubblor</h2>
     <p class="sub">Bubblorna flyter sakta. Ta det i din egen takt – det finns ingen tid och inga poäng att förlora.</p>
     <div id="pond"><div class="pondtxt" id="pondtxt">Tryck på en bubbla</div></div>
@@ -270,6 +273,7 @@
 
   <!-- GROUNDING -->
   <section class="screen" id="s-ground">
+    <button class="ghost backbtn" data-back>← Tillbaka</button>
     <h2>🌿 5-4-3-2-1</h2>
     <p class="sub">När tankarna snurrar kan sinnena hjälpa dig tillbaka till här och nu.</p>
     <div class="card gstep">
@@ -282,6 +286,7 @@
 
   <!-- OROMOLN -->
   <section class="screen" id="s-worry">
+    <button class="ghost backbtn" data-back>← Tillbaka</button>
     <h2>☁️ Oromolnet</h2>
     <p class="sub">Skriv en orolig tanke. Den sparas inte någonstans – den får bara flyga iväg en stund.</p>
     <div class="card">
@@ -294,6 +299,7 @@
 
   <!-- STJÄRNOR -->
   <section class="screen" id="s-stars">
+    <button class="ghost backbtn" data-back>← Tillbaka</button>
     <h2>⭐ Mina modiga stjärnor</h2>
     <p class="sub">Varje gång du gör något fast det kändes läskigt får du en stjärna. Stora som små saker räknas!</p>
     <div class="card">
@@ -307,6 +313,7 @@
 
   <!-- SPEL -->
   <section class="screen" id="s-games">
+    <button class="ghost backbtn" data-back>← Tillbaka</button>
     <h2>🎮 Lugna spel</h2>
     <p class="sub">Här finns ingen tid och inga poäng. Spela så länge du vill och sluta när du vill.</p>
     <div class="grid">
@@ -318,6 +325,7 @@
   </section>
 
   <section class="screen" id="s-kaleido">
+    <button class="ghost backbtn" data-back>← Tillbaka</button>
     <h2>🎨 Kalejdoskop</h2>
     <p class="sub">Dra med fingret. Allt du ritar speglas runt mitten, så det blir ett mönster. Det kan inte bli fel.</p>
     <div class="card" style="padding:12px"><div class="cvwrap"><canvas id="kcv" class="draw" aria-label="Rityta för kalejdoskop"></canvas></div>
@@ -326,6 +334,7 @@
   </section>
 
   <section class="screen" id="s-memory">
+    <button class="ghost backbtn" data-back>← Tillbaka</button>
     <h2>🃏 Lugn memory</h2>
     <p class="sub">Vänd två kort i taget och hitta paren. Ingen klocka, inga poäng. Ta den tid du behöver.</p>
     <div class="card"><div class="mem" id="memGrid"></div>
@@ -335,6 +344,7 @@
   </section>
 
   <section class="screen" id="s-sand">
+    <button class="ghost backbtn" data-back>← Tillbaka</button>
     <h2>🏝️ Sandträdgård</h2>
     <p class="sub">Dra med fingret för att kratta i sanden. Tryck för att lägga en sten. Spåren jämnas sakta ut av sig själva.</p>
     <div class="card" style="padding:12px"><div class="cvwrap"><canvas id="scv" class="draw" aria-label="Sandträdgård"></canvas></div>
@@ -344,6 +354,7 @@
 
   <!-- MUSIK -->
   <section class="screen" id="s-music">
+    <button class="ghost backbtn" data-back>← Tillbaka</button>
     <h2>🎵 Lugn musik</h2>
     <p class="sub">Sätt på något lugnt i bakgrunden. Ljudet fortsätter medan du gör annat i appen.</p>
     <div class="card">
@@ -476,6 +487,7 @@
 <div class="fb" id="fb">
   <p>Kändes det lite bättre?</p>
   <div class="row"><button data-f="2">👍 Ja</button><button data-f="1" class="ghost">🤏 Lite</button><button data-f="-1" class="ghost">👎 Nej</button></div>
+  <button class="ghost" id="fbSkip" style="font-size:.8rem;padding:6px 14px;margin-top:8px;background:none;color:var(--soft)">Hoppa över</button>
 </div>
 
 <nav>
@@ -580,8 +592,10 @@ document.querySelectorAll('.moods button').forEach(b=>{
 });
 
 /* ---------- Navigering ---------- */
-function go(id){
+function go(id, isBack){
   if(id==='parent' && !parentOpen) return;
+  /* Kom ihåg var hon kom ifrån, så att "← Tillbaka" leder rätt */
+  if(!isBack && id !== curScreen){ backStack.push(curScreen); if(backStack.length > 20) backStack.shift(); }
   if(id!=='parent') parentOpen=false;
   document.body.classList.toggle('parent', id==='parent');
   if(id==='parent') renderParent();
@@ -603,7 +617,14 @@ function go(id){
   asked[id] = false;
 }
 let curScreen = 'home';
+const backStack = [];
+function goBack(){
+  let to = backStack.pop();
+  while(to === 'parent' && backStack.length) to = backStack.pop();   // aldrig tillbaka in i föräldravyn
+  go(!to || to === 'parent' ? 'home' : to, true);
+}
 document.querySelectorAll('[data-go]').forEach(b=> b.onclick = ()=>go(b.dataset.go));
+document.querySelectorAll('[data-back]').forEach(b=> b.onclick = goBack);
 
 /* ---------- Andas (4 in, 2 håll, 6 ut) ---------- */
 let bTimer=null, bRounds=0;
@@ -742,7 +763,7 @@ function renderStars(){
     sky.appendChild(el);
   });
   const n=stars.length;
-  document.getElementById('starcount').textContent = n ? n+" modiga stjärnor. Wow! 💫" : "";
+  document.getElementById('starcount').textContent = n ? (n===1 ? "1 modig stjärna. Wow! 💫" : n+" modiga stjärnor. Wow! 💫") : "";
 }
 function escapeHtml(s){ return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 document.getElementById('starAdd').onclick=()=>{
@@ -894,8 +915,14 @@ function renderTalk(a){
   if(a.intense) h += `<div class="reply">Det låter som att känslan är stark just nu. Börja gärna med att andas långsamt – det hjälper kroppen att lugna sig.</div>`;
   h += `<b>Det här kan hjälpa nu:</b><div class="sugg">`;
   suggest(a.cats, a.intense).forEach(s => h += `<button data-ex="${s.e}">${EX[s.e]}${s.learned?'<span class="tag">brukar hjälpa dig</span>':''}</button>`);
-  out.innerHTML = h + `</div></div>`;
+  h += `</div><div class="row" style="margin-top:10px"><button class="ghost" id="notNow">Inte nu, tack</button></div>`;
+  out.innerHTML = h + `</div>`;
   out.querySelectorAll('[data-ex]').forEach(b => b.onclick = ()=>go(b.dataset.ex));
+  $('notNow').onclick = function(){
+    const box = this.closest('.card'); box.querySelectorAll('.sugg, .row, b').forEach(x => x.remove());
+    const r = document.createElement('div'); r.className = 'reply';
+    r.textContent = 'Helt okej. Övningarna finns kvar här när du vill. 💙'; box.appendChild(r);
+  };
   out.scrollIntoView({behavior:'smooth'});
 }
 /* Dagboken är privat som standard. Hon väljer själv per inlägg om föräldern får läsa (s:1). */
@@ -941,14 +968,16 @@ let fbEx=null; const asked={};
 function askFeedback(ex){
   if(asked[ex]) return; asked[ex]=true; fbEx=ex;
   const f=document.getElementById('fb'); f.querySelector('p').textContent="Kändes det lite bättre?";
-  f.querySelector('.row').style.display='flex'; f.classList.add('on');
+  f.querySelector('.row').style.display='flex'; $('fbSkip').style.display=''; f.classList.add('on');
 }
+/* "Hoppa över": inget sparas, frågan bara försvinner */
+document.getElementById('fbSkip').onclick = ()=> document.getElementById('fb').classList.remove('on');
 document.querySelectorAll('#fb [data-f]').forEach(b => b.onclick = ()=>{
   const v=+b.dataset.f, w=W();
   ctxCats().concat(['allt']).forEach(c=>{ w[c]=w[c]||{}; w[c][fbEx]=Math.max(-3, Math.min(12, (w[c][fbEx]||0)+v)); });
   store.set('w', w);
   const fl=store.get('fblog',[]); fl.push({d:Date.now(), e:fbEx, v}); store.set('fblog', fl.slice(-500));
-  const f=document.getElementById('fb'); f.querySelector('.row').style.display='none';
+  const f=document.getElementById('fb'); f.querySelector('.row').style.display='none'; $('fbSkip').style.display='none';
   f.querySelector('p').textContent = v>1 ? "Vad bra! Det ska jag komma ihåg. 💙"
     : v>0 ? "Lite är också bra! Ibland behövs mer tid." : "Tack för att du säger det. Då föreslår jag något annat nästa gång. 💙";
   setTimeout(()=>f.classList.remove('on'), 2200); renderInsight();
