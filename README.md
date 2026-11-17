@@ -94,6 +94,8 @@ Efter det gäller följande:
 
 Innan något publiceras körs testet av textanalysen. Om testet misslyckas publiceras ingenting.
 
+GitHub tillåter bara publicering från `main`. En push till `test` startar därför publiceringen på `main`, som tar med båda grenarna. Det sker automatiskt, men det syns som två körningar under Actions.
+
 ## Testmiljö
 Testa nya saker på din egen telefon innan de når hennes:
 

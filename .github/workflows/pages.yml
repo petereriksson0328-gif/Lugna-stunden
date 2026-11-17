@@ -3,6 +3,10 @@
 #   test  → https://<användare>.github.io/Lugna-stunden/test/   (testversionen)
 # Om grenen "test" inte finns publiceras main även som testversion.
 # Kräver en gång: Settings → Pages → Source: "GitHub Actions".
+#
+# GitHub tillåter bara publicering från main (miljön github-pages skyddar den).
+# En push till test startar därför bara om det här flödet på main, som sedan
+# hämtar både main och test och publicerar båda.
 name: Publicera appen
 
 on:
@@ -12,16 +16,26 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: false
 
 jobs:
-  build:
+  # Push till test: be flödet köra på main i stället
+  starta-fran-main:
+    if: github.ref != 'refs/heads/main'
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Starta publiceringen från main
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run pages.yml --repo "${{ github.repository }}" --ref main
+
+  build:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: pages
+      cancel-in-progress: false
     steps:
       - name: Hämta main
         uses: actions/checkout@v4
@@ -66,6 +80,9 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
