@@ -68,7 +68,9 @@ tests/analys.test.js   test av textanalysen (node tests/analys.test.js)
    - Android: `beforeinstallprompt`
    - iPhone: steg-för-steg-instruktioner (Dela → Lägg till på hemskärmen)
    - efter "Nej" frågar appen igen om 3 dagar
-10. **Om mig:** namn, kort info om oro och BRIS, och rutan "Vad ser min förälder?" som öppet beskriver vad föräldravyn visar.
+10. **Om mig:** namn, kort info om oro och BRIS, och rutan "Vad ser min förälder?" som öppet beskriver vad föräldravyn visar, och knappen "Visa välkomsten igen".
+11. **Lugna spel** (ingen tid, inga poäng, inga ljudeffekter som stressar): Kalejdoskop (8-delad spegling), Lugn memory (6 eller 8 par, ingen klocka eller räknare), Sandträdgård (kratta, stenar, spåren tonas ut). Efter en stund eller när spelet är klart: "Kändes det lite bättre?".
+12. **Lugn musik:** mjuka toner, regn och vågor via Web Audio (offline), volym, "stäng av efter" och en knapp "Stoppa musiken" på andra skärmar. Spotify-länkar (sökningar) och egna Spotify-listor i `music` (bara länkar som börjar med `https://open.spotify.com/`).
 
 ### Två telefoner (utan server)
 - Förälderns telefon: välkomst → Jag är förälder → PIN → **Min egen telefon** (`role` = `parent`). Appen visar en kopplingskod (16 tecken, 2 sista är kontrollsumma) och frågar efter PIN vid varje start.
@@ -92,7 +94,7 @@ tests/analys.test.js   test av textanalysen (node tests/analys.test.js)
 - "Kopiera sammanfattning": en text **utan dagbokstexter** som kan delas med BUP eller en terapeut.
 
 ### localStorage-nycklar (prefix `ls_`)
-`name`, `moods` [{d,m}], `diary` [{d,t,c,m,s}] (s=1 om delad med föräldern), `themelog` [{d,c,x}], `fblog` [{d,e,v}], `w` (inlärningspoäng {tema:{övning:poäng}}, inkl. `allt`), `ctx` (senaste teman), `stars` [{t,d}], `pin` (hash), `pinsalt`, `installNo`, `setup` (1 när välkomsten är klar), `role` (`parent` på förälderns telefon), `paircode`, `pairedat`, `lastsent`, `nudgeNo`, `remote` (senast inlästa rapporten)
+`name`, `moods` [{d,m}], `diary` [{d,t,c,m,s}] (s=1 om delad med föräldern), `themelog` [{d,c,x}], `fblog` [{d,e,v}], `w` (inlärningspoäng {tema:{övning:poäng}}, inkl. `allt`), `ctx` (senaste teman), `stars` [{t,d}], `pin` (hash), `pinsalt`, `installNo`, `setup` (1 när välkomsten är klar), `role` (`parent` på förälderns telefon), `paircode`, `pairedat`, `lastsent`, `nudgeNo`, `remote` (senast inlästa rapporten), `music` [{n,u}] (egna Spotify-listor)
 
 ## Uppgift nu
 1. Läs igenom mitt repository och jämför det med specifikationen ovan.

@@ -107,6 +107,24 @@
   @keyframes pulse{50%{box-shadow:0 0 0 14px #f4a6a633}}
   .sugg{display:grid;gap:10px;margin-top:12px}
   .sugg button{background:#fff;color:var(--ink);text-align:left;border-radius:16px;padding:14px 16px;box-shadow:0 3px 10px #6a7fa014}
+  .sugg button.on{outline:3px solid var(--a2)}
+  .sugg a{display:block;background:#fff;color:var(--ink);text-decoration:none;font-weight:700;border-radius:16px;padding:14px 16px;box-shadow:0 3px 10px #6a7fa014}
+  .ownrow{display:flex;gap:8px;align-items:center}
+  .ownrow a{flex:1}
+  .ownrow button{padding:10px 14px}
+  input[type=range]{border:0;padding:0;background:none;accent-color:var(--a2)}
+  select{font:inherit;border:2px solid #e3e6f0;border-radius:12px;padding:6px 10px;background:#fff;color:var(--ink)}
+
+  /* Spel */
+  .cvwrap{display:flex;justify-content:center}
+  canvas.draw{touch-action:none;border-radius:18px;display:block;max-width:100%}
+  .mem{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .mcard{aspect-ratio:1;font-size:2rem;padding:0;border-radius:16px;background:linear-gradient(135deg,var(--a1),var(--a2));transition:background .3s}
+  .mcard.up{background:#fff;box-shadow:0 3px 10px #6a7fa022}
+  .mcard.done{background:#eaf6ef;box-shadow:none}
+  .musicchip{position:fixed;top:calc(10px + env(safe-area-inset-top));right:12px;z-index:30;background:#fff;color:var(--ink);
+             font-size:.85rem;padding:8px 14px;box-shadow:0 4px 16px #6a7fa033;display:none}
+  .musicchip.on{display:block}
   .tag{font-size:.75rem;background:var(--a3);border-radius:999px;padding:2px 8px;margin-left:6px;font-weight:600}
   .reply{background:#fff;border-radius:16px;padding:14px;margin:10px 0;line-height:1.5}
   .crisis{background:#fff1e6;border:2px solid var(--a4)}
@@ -196,6 +214,8 @@
       <button class="tile" data-go="bubbles"><span class="ic">🎈</span><b>Bubblor</b><small>Poppa lugnt</small></button>
       <button class="tile" data-go="ground"><span class="ic">🌿</span><b>5-4-3-2-1</b><small>Landa i nuet</small></button>
       <button class="tile" data-go="worry"><span class="ic">☁️</span><b>Oromolnet</b><small>Släpp iväg en tanke</small></button>
+      <button class="tile" data-go="games"><span class="ic">🎮</span><b>Lugna spel</b><small>Rita, para ihop, kratta</small></button>
+      <button class="tile" data-go="music"><span class="ic">🎵</span><b>Lugn musik</b><small>Toner, regn, vågor</small></button>
       <button class="tile" data-go="stars" style="grid-column:span 2"><span class="ic">⭐</span><b>Mina modiga stjärnor</b><small>Saker jag klarat</small></button>
     </div>
     <p class="small" id="insight" style="text-align:center;margin-top:14px"></p>
@@ -278,6 +298,72 @@
     <p class="small" id="starcount" style="text-align:center"></p>
   </section>
 
+  <!-- SPEL -->
+  <section class="screen" id="s-games">
+    <h2>🎮 Lugna spel</h2>
+    <p class="sub">Här finns ingen tid och inga poäng. Spela så länge du vill och sluta när du vill.</p>
+    <div class="grid">
+      <button class="tile" data-go="kaleido"><span class="ic">🎨</span><b>Kalejdoskop</b><small>Rita mönster</small></button>
+      <button class="tile" data-go="memory"><span class="ic">🃏</span><b>Lugn memory</b><small>Hitta paren</small></button>
+      <button class="tile" data-go="sand" style="grid-column:span 2"><span class="ic">🏝️</span><b>Sandträdgård</b><small>Kratta i sanden och lägg stenar</small></button>
+      <button class="tile" data-go="bubbles" style="grid-column:span 2"><span class="ic">🎈</span><b>Lugna bubblor</b><small>Poppa i din egen takt</small></button>
+    </div>
+  </section>
+
+  <section class="screen" id="s-kaleido">
+    <h2>🎨 Kalejdoskop</h2>
+    <p class="sub">Dra med fingret. Allt du ritar speglas runt mitten, så det blir ett mönster. Det kan inte bli fel.</p>
+    <div class="card" style="padding:12px"><div class="cvwrap"><canvas id="kcv" class="draw" aria-label="Rityta för kalejdoskop"></canvas></div>
+      <div class="row" style="margin-top:12px"><button class="ghost" id="kColor">🎨 Ny färg</button><button class="ghost" id="kClear">Börja om</button></div></div>
+    <div class="row"><button class="ghost" data-go="games">← Fler spel</button></div>
+  </section>
+
+  <section class="screen" id="s-memory">
+    <h2>🃏 Lugn memory</h2>
+    <p class="sub">Vänd två kort i taget och hitta paren. Ingen klocka, inga poäng. Ta den tid du behöver.</p>
+    <div class="card"><div class="mem" id="memGrid"></div>
+      <p id="memMsg" style="text-align:center;min-height:1.5em;font-weight:700;margin:12px 0 4px"></p>
+      <div class="row"><button class="ghost" id="memNew">Nytt spel</button><button class="ghost" id="memSize">Fler kort</button></div></div>
+    <div class="row"><button class="ghost" data-go="games">← Fler spel</button></div>
+  </section>
+
+  <section class="screen" id="s-sand">
+    <h2>🏝️ Sandträdgård</h2>
+    <p class="sub">Dra med fingret för att kratta i sanden. Tryck för att lägga en sten. Spåren jämnas sakta ut av sig själva.</p>
+    <div class="card" style="padding:12px"><div class="cvwrap"><canvas id="scv" class="draw" aria-label="Sandträdgård"></canvas></div>
+      <div class="row" style="margin-top:12px"><button class="ghost" id="sClear">Jämna ut sanden</button></div></div>
+    <div class="row"><button class="ghost" data-go="games">← Fler spel</button></div>
+  </section>
+
+  <!-- MUSIK -->
+  <section class="screen" id="s-music">
+    <h2>🎵 Lugn musik</h2>
+    <p class="sub">Sätt på något lugnt i bakgrunden. Ljudet fortsätter medan du gör annat i appen.</p>
+    <div class="card">
+      <b>Ljud i appen</b>
+      <p class="small" style="margin:2px 0 10px">Fungerar utan internet.</p>
+      <div class="sugg" id="mKinds">
+        <button data-mk="toner">🎹 Mjuka toner</button>
+        <button data-mk="regn">🌧️ Regn</button>
+        <button data-mk="vagor">🌊 Vågor</button>
+      </div>
+      <div class="row" style="margin-top:14px;align-items:center;flex-wrap:nowrap"><span>🔈</span><input type="range" id="mVol" min="5" max="100" value="60" aria-label="Volym" style="max-width:240px"><span>🔊</span></div>
+      <div class="row" style="margin-top:10px;align-items:center"><label for="mSleep" class="small">Stäng av efter</label>
+        <select id="mSleep"><option value="0">Aldrig</option><option value="10">10 min</option><option value="20">20 min</option><option value="30">30 min</option></select></div>
+      <div class="row" style="margin-top:12px"><button class="ghost" id="mStop" style="display:none">⏹ Stoppa</button></div>
+    </div>
+    <div class="card">
+      <b>🎧 Spotify</b>
+      <p class="small" style="margin:2px 0 10px">Öppnas i Spotify.</p>
+      <div class="sugg" id="spList"></div>
+      <p class="small" style="margin:16px 0 6px"><b>Lägg till en egen lista.</b> I Spotify: tryck på ⋯ → Dela → Kopiera länk, och klistra in här.</p>
+      <input id="spName" maxlength="40" placeholder="Namn, t.ex. Min lugna lista">
+      <input id="spUrl" placeholder="https://open.spotify.com/…" style="margin-top:8px" autocomplete="off" spellcheck="false">
+      <p class="small" id="spErr" style="color:#c0605a;min-height:1.2em"></p>
+      <div class="row"><button id="spAdd">Lägg till</button></div>
+    </div>
+  </section>
+
   <!-- FÖRÄLDRAVY (dold – nås via 5 snabba tryck på hälsningen + PIN) -->
   <section class="screen" id="s-parent">
     <h2>👪 Föräldravy</h2>
@@ -331,6 +417,7 @@
       <div id="shareBody"></div>
       <textarea id="sendBox" rows="5" style="display:none;margin-top:8px" readonly></textarea>
     </div>
+    <div class="row" style="margin-top:6px"><button class="ghost" id="meWelcome" style="font-size:.85rem;padding:8px 16px">👋 Visa välkomsten igen</button></div>
     <div class="row" style="margin-top:6px"><button class="ghost" id="meParent" style="font-size:.85rem;padding:8px 16px">👪 För föräldrar</button></div>
   </section>
 </div>
@@ -360,6 +447,7 @@
 </div>
 
 <div class="toast" id="toast" role="status"></div>
+<button class="musicchip" id="musicChip">🎵 Stoppa musiken</button>
 
 <div class="fb" id="fb">
   <p>Kändes det lite bättre?</p>
@@ -477,11 +565,17 @@ function go(id){
   if(id==='bubbles') startBubbles(); else stopBubbles();
   if(id==='ground') resetGround();
   if(id==='stars') renderStars();
-  if(id==='me'){ document.getElementById('nameIn').value = store.get('name',''); renderShare(); }
+  if(id==='me'){ document.getElementById('nameIn').value = store.get('name',''); renderShare();
+    document.getElementById('meWelcome').parentNode.style.display = isParentPhone() ? 'none' : ''; }
   if(id==='home') renderNudge();
   if(id==='talk') renderDiary(); else stopRec();
+  if(id==='kaleido') kInit();
+  if(id==='memory' && !mem.cards.length) mNew();
+  if(id==='sand') sInit(); else sStop();
+  curScreen = id; renderMusic();
   asked[id] = false;
 }
+let curScreen = 'home';
 document.querySelectorAll('[data-go]').forEach(b=> b.onclick = ()=>go(b.dataset.go));
 
 /* ---------- Andas (4 in, 2 håll, 6 ut) ---------- */
@@ -630,7 +724,8 @@ document.getElementById('starAdd').onclick=()=>{
 };
 
 /* ---------- Berätta: förstå, föreslå, lära ---------- */
-const EX = {breath:"🫧 Andas med bollen", bubbles:"🎈 Lugna bubblor", ground:"🌿 5-4-3-2-1", worry:"☁️ Oromolnet", stars:"⭐ Modiga stjärnor"};
+const EX = {breath:"🫧 Andas med bollen", bubbles:"🎈 Lugna bubblor", ground:"🌿 5-4-3-2-1", worry:"☁️ Oromolnet", stars:"⭐ Modiga stjärnor",
+  kaleido:"🎨 Kalejdoskop", memory:"🃏 Lugn memory", sand:"🏝️ Sandträdgård", music:"🎵 Lugn musik"};
 
 /* ANALYS-START – testas av tests/analys.test.js */
 /* Kategorier: ordstammar som känns igen, och vad som brukar passa.
@@ -663,14 +758,14 @@ const CATS = {
       "När det är bråttom blir oron ofta större. Ta tre långsamma andetag först – det tar bara några sekunder.",
       "Även om morgonen blir stressig kan resten av dagen bli bra."
     ]},
-  kompisar:{label:"kompisar", ex:["worry","stars","bubbles"],
+  kompisar:{label:"kompisar", ex:["worry","stars","kaleido"],
     ord:["kompis","vän","vänner","ensam","retas","retade","bråk","utanför","mobb","elak"],
     msgs:[
       "Alla känner sig utanför ibland. Det betyder inte att något är fel på dig.",
       "Det är modigt att berätta. Prata gärna med en vuxen om det som händer med kompisarna.",
       "Du förtjänar kompisar som är snälla mot dig."
     ]},
-  somn:{label:"sömnen", ex:["bubbles","breath","ground"],
+  somn:{label:"sömnen", ex:["music","breath","sand"],
     ord:["sova","sov","sömn","trött","natt","mardröm","vaknade","somna"],
     msgs:[
       "När man är trött känns oron större än den egentligen är. Den krymper ofta när du har vilat.",
@@ -1264,6 +1359,206 @@ async function importReport(text){
   store.set('remote', r); showCode = false; renderParent(); $('pTwoMsg').textContent = 'Rapporten är inläst 💙';
 }
 
+/* ---------- Lugna spel ----------
+   Inga poäng, ingen tid, inget som kan gå fel. Efter en stund frågar appen "Kändes det lite bättre?". */
+
+/* Gemensamt: kvadratisk rityta som följer skärmbredden, och fingerritning */
+function sizeCanvas(cv){
+  const w = Math.min(cv.parentNode.clientWidth, 460); if(!w) return false;
+  const dpr = window.devicePixelRatio || 1, px = Math.round(w*dpr);
+  if(cv.width === px) return false;
+  cv.style.width = cv.style.height = w + 'px'; cv.width = cv.height = px;
+  cv.getContext('2d').setTransform(dpr,0,0,dpr,0,0); return true;
+}
+function drawable(cv, onSeg, onTap){
+  let last = null, moved = false;
+  const pt = e => { const r = cv.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; };
+  cv.addEventListener('pointerdown', e => { try{ cv.setPointerCapture(e.pointerId); }catch(_){} last = pt(e); moved = false; });
+  cv.addEventListener('pointermove', e => { if(!last) return; const p = pt(e);
+    if(Math.hypot(p.x-last.x, p.y-last.y) < 2) return; onSeg(last, p); last = p; moved = true; });
+  cv.addEventListener('pointerup', () => { if(last && !moved && onTap) onTap(last); last = null; });
+  cv.addEventListener('pointercancel', () => { last = null; });
+}
+/* Fråga om det hjälpte först när hon har hållit på en stund */
+function playedAWhile(state, ex){ const n = Date.now(); if(!state.t) state.t = n; else if(n - state.t > 60e3) askFeedback(ex); }
+
+/* Kalejdoskop: det hon ritar speglas i 8 delar runt mitten */
+let kHue = 200; const kPlay = {t:0};
+function kInit(){ const cv = $('kcv'); if(sizeCanvas(cv)) kFill(); kPlay.t = 0; }
+function kFill(){ const cv = $('kcv'), x = cv.getContext('2d'); x.fillStyle = '#27304f'; x.fillRect(0, 0, cv.clientWidth, cv.clientHeight); }
+function kSeg(a, b){
+  const cv = $('kcv'), x = cv.getContext('2d'), c = cv.clientWidth/2, N = 8;
+  kHue = (kHue + 0.6) % 360;
+  x.strokeStyle = `hsla(${kHue},80%,74%,.9)`; x.lineWidth = 3.5; x.lineCap = 'round';
+  for(let i=0;i<N;i++) for(const mir of [1,-1]){
+    x.save(); x.translate(c, c); x.rotate(i*2*Math.PI/N); x.scale(1, mir);
+    x.beginPath(); x.moveTo(a.x-c, a.y-c); x.lineTo(b.x-c, b.y-c); x.stroke(); x.restore();
+  }
+  playedAWhile(kPlay, 'kaleido');
+}
+drawable($('kcv'), kSeg, p => kSeg(p, {x:p.x+0.5, y:p.y+0.5}));
+$('kColor').onclick = ()=>{ kHue = (kHue + 70) % 360; toast('Ny färg 🎨'); };
+$('kClear').onclick = kFill;
+
+/* Lugn memory: vänd två kort i taget. Ingen klocka och ingen räknare för försök. */
+const MEM_ICONS = ["🌸","🌙","🍃","🐚","⭐","🌈","🦋","🌻"];
+let mem = {cards:[], open:[], lock:false, pairs:6};
+function mNew(){
+  const ic = MEM_ICONS.slice().sort(()=>Math.random()-.5).slice(0, mem.pairs);
+  mem.cards = ic.concat(ic).sort(()=>Math.random()-.5).map(e => ({e, up:false, done:false}));
+  mem.open = []; mem.lock = false; $('memMsg').textContent = ''; mRender();
+}
+function mRender(){
+  const g = $('memGrid');
+  g.innerHTML = mem.cards.map((c,i) => { const show = c.up || c.done;
+    return `<button class="mcard${show?' up':''}${c.done?' done':''}" data-i="${i}" aria-label="${show ? c.e : 'Dolt kort'}">${show ? c.e : ''}</button>`; }).join('');
+  g.querySelectorAll('[data-i]').forEach(b => b.onclick = ()=> mFlip(+b.dataset.i));
+}
+function mFlip(i){
+  const c = mem.cards[i]; if(mem.lock || c.up || c.done) return;
+  c.up = true; mem.open.push(i);
+  if(mem.open.length === 2){
+    const [a, b] = mem.open.map(j => mem.cards[j]);
+    if(a.e === b.e){
+      a.done = b.done = true; a.up = b.up = false; mem.open = [];
+      if(mem.cards.every(x => x.done)){
+        $('memMsg').textContent = pick(["Alla par hittade 🌿","Fint! Alla par är hittade 💙","Klart! Ta ett lugnt andetag 🫧"]);
+        setTimeout(()=> askFeedback('memory'), 1200);
+      }
+    } else {
+      mem.lock = true;
+      setTimeout(()=>{ a.up = b.up = false; mem.open = []; mem.lock = false; mRender(); }, 1100);
+    }
+  }
+  mRender();
+}
+$('memNew').onclick = mNew;
+$('memSize').onclick = function(){ mem.pairs = mem.pairs === 6 ? 8 : 6; this.textContent = mem.pairs === 6 ? 'Fler kort' : 'Färre kort'; mNew(); };
+
+/* Sandträdgård: kratta med fingret, tryck för en sten. Spåren jämnas sakta ut. */
+let sPat = null, sStones = [], sTick = null; const sPlay = {t:0};
+function sInit(){
+  const cv = $('scv');
+  if(sizeCanvas(cv) || !sPat){ sMakePat(); sClear(); }
+  sPlay.t = 0; if(!sTick) sTick = setInterval(sFade, 120);
+}
+function sStop(){ clearInterval(sTick); sTick = null; }
+function sMakePat(){
+  const p = document.createElement('canvas'); p.width = p.height = 120; const x = p.getContext('2d');
+  x.fillStyle = '#ecdfc5'; x.fillRect(0, 0, 120, 120);
+  for(let i=0;i<900;i++){ x.fillStyle = `rgba(${Math.random()<.5 ? '120,95,60' : '255,250,240'},${(Math.random()*.18).toFixed(3)})`;
+    x.fillRect(Math.random()*120, Math.random()*120, 1.2, 1.2); }
+  sPat = $('scv').getContext('2d').createPattern(p, 'repeat');
+}
+function sPaint(alpha){ const cv = $('scv'), x = cv.getContext('2d'); x.globalAlpha = alpha; x.fillStyle = sPat; x.fillRect(0, 0, cv.clientWidth, cv.clientHeight); x.globalAlpha = 1; }
+function sClear(){ sStones = []; sPaint(1); }
+function sFade(){ sPaint(0.012); sStones.forEach(sDrawStone); }
+function sDrawStone(s){
+  const x = $('scv').getContext('2d'), g = x.createRadialGradient(s.x - s.r*.35, s.y - s.r*.4, s.r*.1, s.x, s.y, s.r*1.1);
+  g.addColorStop(0, '#b9b4ad'); g.addColorStop(1, '#6f6a64');
+  x.fillStyle = g; x.beginPath(); x.ellipse(s.x, s.y, s.r*1.2, s.r, s.rot, 0, Math.PI*2); x.fill();
+}
+function sSeg(a, b){
+  const x = $('scv').getContext('2d'), dx = b.x-a.x, dy = b.y-a.y, L = Math.hypot(dx, dy) || 1, nx = -dy/L, ny = dx/L;
+  x.lineCap = 'round';
+  for(let k=-1.5;k<=1.5;k++){   // fyra pinnar på krattan
+    const ox = nx*k*7, oy = ny*k*7;
+    x.strokeStyle = 'rgba(140,110,70,.35)'; x.lineWidth = 2.6;
+    x.beginPath(); x.moveTo(a.x+ox, a.y+oy); x.lineTo(b.x+ox, b.y+oy); x.stroke();
+    x.strokeStyle = 'rgba(255,252,240,.55)'; x.lineWidth = 1.2;
+    x.beginPath(); x.moveTo(a.x+ox+nx*2, a.y+oy+ny*2); x.lineTo(b.x+ox+nx*2, b.y+oy+ny*2); x.stroke();
+  }
+  sStones.forEach(sDrawStone); playedAWhile(sPlay, 'sand');
+}
+drawable($('scv'), sSeg, p => { sStones.push({x:p.x, y:p.y, r:9+Math.random()*9, rot:Math.random()*Math.PI});
+  if(sStones.length > 7) sStones.shift(); sDrawStone(sStones[sStones.length-1]); });
+$('sClear').onclick = sClear;
+
+/* ---------- Lugn musik ----------
+   Ljuden skapas i appen med Web Audio (fungerar utan internet): mjuka toner i pentatonisk skala, regn och vågor. */
+const music = {kind:null, master:null, nodes:[], timers:[], bellT:null, sleepT:null, started:0};
+function mVolume(){ return Math.max(0.0001, (+$('mVol').value/100) * 0.5); }
+function noiseBuf(ctx, brown){
+  const n = ctx.sampleRate*4, b = ctx.createBuffer(1, n, ctx.sampleRate), d = b.getChannelData(0); let last = 0;
+  for(let i=0;i<n;i++){ const w = Math.random()*2-1; if(brown){ last = (last + 0.02*w)/1.02; d[i] = last*3.5; } else d[i] = w; }
+  return b;
+}
+function musicPlay(kind){
+  musicStop(true);
+  let ctx;
+  try{ actx = actx || new (window.AudioContext||window.webkitAudioContext)(); ctx = actx; if(ctx.state === 'suspended') ctx.resume(); }
+  catch(e){ toast('Ljud fungerar inte i den här webbläsaren.'); return; }
+  const m = ctx.createGain(), t = ctx.currentTime;
+  m.gain.setValueAtTime(0.0001, t); m.gain.exponentialRampToValueAtTime(mVolume(), t+2); m.connect(ctx.destination);
+  Object.assign(music, {kind, master:m, started:Date.now()});
+  const keep = n => { music.nodes.push(n); return n; };
+  if(kind === 'toner'){
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900; lp.connect(m);
+    const CHORDS = [[130.81,196.00,329.63],[110.00,164.81,261.63],[87.31,174.61,261.63],[98.00,146.83,246.94]];
+    const pads = [0,1,2].map(() => { const o = keep(ctx.createOscillator()), g = ctx.createGain();
+      o.type = 'sine'; g.gain.value = 0.12; o.connect(g).connect(lp); o.start(); return o; });
+    let ci = 0; const chord = () => { CHORDS[ci++ % 4].forEach((f,i) => pads[i].frequency.setTargetAtTime(f, ctx.currentTime, 1.5)); };
+    chord(); music.timers.push(setInterval(chord, 12000));
+    const BELL = [523.25,587.33,659.25,783.99,880.00,1046.5];
+    const bell = () => { if(music.master !== m) return;
+      const o = ctx.createOscillator(), g = ctx.createGain(), n = ctx.currentTime;
+      o.type = 'sine'; o.frequency.value = BELL[Math.floor(Math.random()*BELL.length)];
+      g.gain.setValueAtTime(0.0001, n); g.gain.exponentialRampToValueAtTime(0.08, n+0.05); g.gain.exponentialRampToValueAtTime(0.0001, n+4);
+      o.connect(g).connect(m); o.start(n); o.stop(n+4.2);
+      music.bellT = setTimeout(bell, 2200 + Math.random()*3500); };
+    music.bellT = setTimeout(bell, 1500);
+  } else {
+    const src = keep(ctx.createBufferSource()); src.buffer = noiseBuf(ctx, kind === 'vagor'); src.loop = true;
+    const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = kind === 'regn' ? 2500 : 600;
+    const g = ctx.createGain(); g.gain.value = kind === 'regn' ? 0.22 : 0.35;
+    src.connect(f).connect(g).connect(m); src.start();
+    if(kind === 'vagor'){   // vågor: volymen stiger och sjunker sakta, ungefär var 12:e sekund
+      const lfo = keep(ctx.createOscillator()), lg = ctx.createGain(); lfo.frequency.value = 0.08; lg.gain.value = 0.28;
+      lfo.connect(lg).connect(g.gain); lfo.start(); }
+  }
+  const mins = +$('mSleep').value; if(mins) music.sleepT = setTimeout(()=> musicStop(false, 20), mins*60e3);
+  renderMusic();
+}
+function musicStop(silent, fade){
+  const m = music.master; if(!m) return;
+  const played = Date.now() - music.started, f = fade || 1.5, t = actx.currentTime, nodes = music.nodes;
+  music.timers.forEach(x => clearInterval(x)); clearTimeout(music.bellT); clearTimeout(music.sleepT);
+  m.gain.cancelScheduledValues(t); m.gain.setValueAtTime(Math.max(0.0001, m.gain.value), t); m.gain.exponentialRampToValueAtTime(0.0001, t+f);
+  setTimeout(()=>{ nodes.forEach(n => { try{ n.stop(); }catch(e){} }); try{ m.disconnect(); }catch(e){} }, f*1000 + 200);
+  Object.assign(music, {kind:null, master:null, nodes:[], timers:[], bellT:null, sleepT:null});
+  renderMusic();
+  if(!silent && played > 120e3) askFeedback('music');
+}
+function renderMusic(){
+  document.querySelectorAll('[data-mk]').forEach(b => b.classList.toggle('on', b.dataset.mk === music.kind));
+  $('mStop').style.display = music.kind ? '' : 'none';
+  $('musicChip').classList.toggle('on', !!music.kind && curScreen !== 'music' && curScreen !== 'parent');
+  if(curScreen === 'music') renderSpotify();
+}
+document.querySelectorAll('[data-mk]').forEach(b => b.onclick = ()=> music.kind === b.dataset.mk ? musicStop(false) : musicPlay(b.dataset.mk));
+$('mStop').onclick = ()=> musicStop(false);
+$('musicChip').onclick = ()=> musicStop(false);
+$('mVol').oninput = ()=>{ if(music.master) music.master.gain.setTargetAtTime(mVolume(), actx.currentTime, 0.1); };
+$('mSleep').onchange = ()=>{ clearTimeout(music.sleepT); const mins = +$('mSleep').value;
+  if(music.master && mins) music.sleepT = setTimeout(()=> musicStop(false, 20), mins*60e3); };
+
+/* Spotify: sökningar som alltid fungerar, plus hennes egna listor (ls_music) */
+const SPOTIFY = [["🎹 Lugn pianomusik","lugn piano"],["🌿 Naturljud","naturljud avslappning"],["☕ Lo-fi att varva ner till","lofi chill"],["🌙 Musik att somna till","sleep music"]];
+function renderSpotify(){
+  const own = store.get('music', []), el = $('spList');
+  el.innerHTML = own.map((x,i) => `<div class="ownrow"><a href="${escapeHtml(x.u)}" target="_blank" rel="noopener">💜 ${escapeHtml(x.n)}</a><button class="ghost" data-del="${i}" aria-label="Ta bort ${escapeHtml(x.n)}">✕</button></div>`).join('')
+    + SPOTIFY.map(([n,q]) => `<a href="https://open.spotify.com/search/${encodeURIComponent(q)}" target="_blank" rel="noopener">${n}</a>`).join('');
+  el.querySelectorAll('[data-del]').forEach(b => b.onclick = ()=>{ const l = store.get('music', []); l.splice(+b.dataset.del, 1); store.set('music', l); renderSpotify(); });
+}
+$('spAdd').onclick = ()=>{
+  const n = $('spName').value.trim(), u = $('spUrl').value.trim();
+  if(!/^https:\/\/open\.spotify\.com\/[^\s"'<>]+$/.test(u)){ $('spErr').textContent = 'Klistra in en länk som börjar med https://open.spotify.com/'; return; }
+  const l = store.get('music', []); l.unshift({n: n || 'Min lista', u}); store.set('music', l.slice(0, 10));
+  $('spName').value = ''; $('spUrl').value = ''; $('spErr').textContent = ''; renderSpotify(); toast('Tillagd 💜');
+};
+
+$('meWelcome').onclick = ()=> showWelcome('name');
+
 /* ---------- Namn ---------- */
 document.getElementById('saveName').onclick=()=>{ store.set('name', document.getElementById('nameIn').value.trim()); greet(); go('home'); };
 
@@ -1291,7 +1586,7 @@ function showWelcome(step){
       <input id="wName" maxlength="30" placeholder="Ditt namn" value="${name}">
       <div class="row" style="margin-top:14px"><button id="wNext">Nästa</button><button class="ghost" id="wSkip">Hoppa över</button></div>`,
     how: `<div class="wic">🌿</div><h3>Så här fungerar Lugna Stunden</h3>
-      <div class="steps">✨ Varje dag finns en tanke till dig.<br>🫧 Andas, bubblor och 5-4-3-2-1 hjälper kroppen att landa.<br>🎙️ Under <b>Berätta</b> kan du prata eller skriva hur du känner.<br>⭐ Samla modiga stjärnor för saker du har vågat.</div>
+      <div class="steps">✨ Varje dag finns en tanke till dig.<br>🫧 Andas, bubblor och 5-4-3-2-1 hjälper kroppen att landa.<br>🎮 Lugna spel och 🎵 lugn musik när du vill varva ner.<br>🎙️ Under <b>Berätta</b> kan du prata eller skriva hur du känner.<br>⭐ Samla modiga stjärnor för saker du har vågat.</div>
       <p class="small">Det finns inga fel svar och ingen brådska.</p>
       <div class="row"><button id="wNext">Nästa</button></div>`,
     mine: `<div class="wic">🔒</div><h3>Det här är ditt</h3>
