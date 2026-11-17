@@ -13,7 +13,8 @@ En lugn liten webbapp för barn (ca 10–14 år) som kämpar med oro. Den är gj
 
 - **Berätta hur du känner** – prata in eller skriv hur det känns och varför. Appen känner igen teman (magen/kroppen, skolan, tid/stress, kompisar, sömn, nya saker, hemma), svarar med passande meddelanden och föreslår övningar.
 - **Lär sig vad som hjälper** – efter en övning frågar appen "Kändes det lite bättre?". Svaren påverkar vilka övningar som föreslås nästa gång, för just det temat.
-- **Dagbok** – det hon berättar kan sparas (valfritt) och rensas när hon vill.
+- **Dagbok** – det hon berättar kan sparas (valfritt) och rensas när hon vill. Dagboken är **privat som standard**. Hon väljer själv, per inlägg, om du som förälder får läsa (🔒 Bara min / 👪 Delad), och kan ändra sig när hon vill.
+- **Vad ser min förälder?** – under *Om mig* står det öppet vad föräldravyn visar, så att ingenting sker i smyg.
 - **Trygghetsspärr** – om texten låter som allvarlig nöd uppmanas hon att gå till en vuxen direkt, och BRIS och 112 visas.
 
 ### Om röstinmatning
@@ -29,21 +30,22 @@ Visar för 7 eller 30 dagar:
 - vad oron handlar om (teman)
 - vilka övningar som hjälper enligt hennes egna svar
 - modiga stjärnor
-- dagbokstexter (dolda tills du trycker "Visa")
-- **varning** om hon har skrivit något som låter som allvarlig nöd
+- dagboken: hur många inlägg hon har skrivit, och **bara de inlägg hon själv har delat** med dig (dolda tills du trycker "Visa")
+- **varning** om hon har skrivit något som låter som allvarlig nöd. Du får veta vilken dag, men inte vad hon skrev. Det står också öppet för henne i appen.
 - "Kopiera sammanfattning", en text utan dagbokstexter att dela med BUP eller en terapeut
 
 Vyn låses automatiskt när appen stängs eller läggs i bakgrunden.
 **Glömt PIN?** Öppna appen med `#nollstall-pin` sist i adressen. Då nollställs bara PIN-koden.
 
-> PIN-koden skyddar mot att man råkar hitta vyn, men den är inte riktig säkerhet. Koden ligger i ett publikt repo, och all data finns i hennes telefon.
+> PIN-koden hashas med SHA-256 och ett slumpat salt. Den skyddar mot att man råkar hitta vyn, men den är inte riktig säkerhet. Koden ligger i ett publikt repo, och all data finns i hennes telefon.
 
 ## Filer
 ```
 index.html          appen
 manifest.json       gör att den kan installeras som app
 sw.js               service worker – offline + installation
-icons/              appikoner
+icons/              appikoner (192, 512, maskable 512, apple-touch 180)
+tests/              test av textanalysen: node tests/analys.test.js
 ```
 
 ## Installera som app
@@ -52,7 +54,7 @@ När hon öppnar länken första gången kommer frågan **"Vill du spara appen p
 - **iPhone/iPad:** Apple tillåter inte att en webbsida installerar sig själv. "Ja" visar därför tre enkla steg via Dela-knappen → *Lägg till på hemskärmen*.
 - Svarar hon "Nej" frågar appen igen om 3 dagar. När appen väl är installerad visas frågan aldrig mer.
 
-Efter installationen fungerar appen även utan internet. **Om du ändrar i appen** behöver du höja `VERSION` i `sw.js` (t.ex. `lugna-v2`). Då hämtar telefonen den nya versionen. Den syns när appen öppnas nästa gång.
+Efter installationen fungerar appen även utan internet. **Om du ändrar i appen** behöver du höja `VERSION` i `sw.js` (t.ex. från `lugna-v3` till `lugna-v4`). Då hämtar telefonen den nya versionen. Den syns när appen öppnas nästa gång.
 
 ## Publicera på GitHub Pages
 1. Lägg alla filer ovan (även mappen `icons`) i ett repository.
@@ -61,6 +63,15 @@ Efter installationen fungerar appen även utan internet. **Om du ändrar i appen
 4. Efter någon minut ligger appen på `https://<användarnamn>.github.io/<repo>/`.
 
 **Tips:** Öppna länken i Safari/Chrome på mobilen och välj **Lägg till på hemskärmen**, så känns den som en riktig app.
+
+## Varför dagboken är privat
+Det hon skriver är hennes. Om hon tror att allt läses, slutar hon troligen skriva ärligt, och då hjälper dagboken varken henne eller er. Därför ser du mönster (humör, teman och vad som hjälper), men inte hennes ord, om hon inte själv väljer att dela dem. Ett tips är att berätta det för henne och visa rutan *Vad ser min förälder?* tillsammans. Undantaget är säkerheten: om något låter allvarligt får du veta att det har hänt.
+
+## Test
+```
+node tests/analys.test.js
+```
+Testar att temana känns igen rätt (till exempel att "prova" inte räknas som prov) och att trygghetsspärren reagerar på allvarliga formuleringar. Lägg gärna till egna meningar i testet.
 
 ## Anpassa
 Meddelandena ligger i listan `MESSAGES` i `index.html`. Där kan du lägga till egna, till exempel insidesskämt eller saker hon tycker om.

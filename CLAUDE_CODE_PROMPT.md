@@ -32,6 +32,7 @@ manifest.json
 sw.js
 icons/            icon-192.png, icon-512.png, icon-maskable-512.png, apple-touch-icon.png
 README.md
+tests/analys.test.js   test av textanalysen (node tests/analys.test.js)
 ```
 
 ## Funktioner som ska finnas
@@ -50,7 +51,7 @@ README.md
    - hon kan prata (Web Speech API, `sv-SE`) eller skriva; om taligenkänning saknas visas en hänvisning till tangentbordets mikrofon
    - lokal nyckelordsanalys (`CATS`) i 7 teman: kropp/mage, skola, tid/stress, kompisar, sömn, nytt, familj
    - appen svarar med en bekräftelse ("Det låter som att du känner oro för …"), meddelanden för temat och 3 föreslagna övningar
-   - en valfri dagbok som hon kan rensa själv
+   - en valfri dagbok som hon kan rensa själv. Dagboken är **privat som standard**: hon väljer per inlägg om föräldern får läsa (🔒/👪) och kan ändra sig när hon vill
 8. **Inlärning**
    - efter en övning frågar appen "Kändes det lite bättre?" 👍/🤏/👎
    - poängen sparas per (tema, övning) och påverkar vilka övningar som föreslås nästa gång; märkningen "brukar hjälpa dig" visas
@@ -60,10 +61,10 @@ README.md
    - Android: `beforeinstallprompt`
    - iPhone: steg-för-steg-instruktioner (Dela → Lägg till på hemskärmen)
    - efter "Nej" frågar appen igen om 3 dagar
-10. **Om mig:** namn, och kort info om oro och BRIS.
+10. **Om mig:** namn, kort info om oro och BRIS, och rutan "Vad ser min förälder?" som öppet beskriver vad föräldravyn visar.
 
 ### Dold föräldravy
-- Öppnas med **5 snabba tryck på hälsningen** och PIN-kod (4–6 siffror, SHA-256 med salt). Det finns ingen synlig knapp.
+- Öppnas med **5 snabba tryck på hälsningen** och PIN-kod (4–6 siffror, SHA-256 med slumpat salt per enhet i `pinsalt`). Det finns ingen synlig knapp.
 - Låses automatiskt vid `visibilitychange`. `#nollstall-pin` i adressen nollställer PIN-koden.
 - Visar för 7 eller 30 dagar:
   - nyckeltal
@@ -72,12 +73,12 @@ README.md
   - teman
   - vad som hjälper (👍/🤏/👎 per övning)
   - modiga stjärnor
-  - dagbokstexter (dolda tills föräldern trycker "Visa")
-  - en varningsruta vid allvarliga formuleringar
+  - dagboken: antal inlägg, och bara de inlägg hon själv har delat (dolda tills föräldern trycker "Visa", och dolda igen varje gång vyn öppnas)
+  - en varningsruta vid allvarliga formuleringar (datum, aldrig själva texten)
 - "Kopiera sammanfattning": en text **utan dagbokstexter** som kan delas med BUP eller en terapeut.
 
 ### localStorage-nycklar (prefix `ls_`)
-`name`, `moods` [{d,m}], `diary` [{d,t,c,m}], `themelog` [{d,c,x}], `fblog` [{d,e,v}], `w` (inlärningspoäng {tema:{övning:poäng}}, inkl. `allt`), `ctx` (senaste teman), `stars` [{t,d}], `pin` (hash), `installNo`
+`name`, `moods` [{d,m}], `diary` [{d,t,c,m,s}] (s=1 om delad med föräldern), `themelog` [{d,c,x}], `fblog` [{d,e,v}], `w` (inlärningspoäng {tema:{övning:poäng}}, inkl. `allt`), `ctx` (senaste teman), `stars` [{t,d}], `pin` (hash), `pinsalt`, `installNo`
 
 ## Uppgift nu
 1. Läs igenom mitt repository och jämför det med specifikationen ovan.

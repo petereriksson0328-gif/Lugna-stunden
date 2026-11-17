@@ -116,6 +116,8 @@
   .fb p{margin:0 0 10px;font-weight:700}
   .chk{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:.9rem;color:var(--soft)}
   .chk input{width:auto}
+  .share{font-size:.72rem;padding:3px 9px;margin-left:6px;background:#eef0f6;color:var(--soft);font-weight:600}
+  .share.on{background:var(--a3);color:#1f3442}
 
   /* Installera */
   .install-bg{position:fixed;inset:0;background:#3b4a5a55;backdrop-filter:blur(3px);z-index:50;
@@ -196,11 +198,13 @@
       <p class="small" id="micHint" style="text-align:center;margin:4px 0 12px">Tryck och prata</p>
       <textarea id="talkIn" rows="4" placeholder="Jag känner mig … för att …"></textarea>
       <label class="chk"><input type="checkbox" id="saveDiary" checked> Spara i min dagbok</label>
+      <label class="chk"><input type="checkbox" id="shareDiary"> Låt min förälder läsa det här</label>
       <div class="row" style="margin-top:12px"><button id="talkGo">Klar 💙</button></div>
     </div>
     <div id="talkOut"></div>
     <div class="card">
       <b>Min dagbok</b>
+      <p class="small" style="margin:4px 0 6px">Din dagbok är bara din. 🔒 betyder att bara du kan läsa inlägget. Tryck på den om du vill dela inlägget med din förälder (👪). Du kan ändra dig när du vill.</p>
       <ul class="list" id="diary"></ul>
       <div class="row" style="margin-top:10px"><button class="ghost" id="clearDiary">Rensa dagboken</button></div>
     </div>
@@ -245,7 +249,7 @@
       <textarea id="worryIn" rows="3" placeholder="Jag är orolig för att…"></textarea>
       <div class="row" style="margin-top:12px"><button id="worryGo">Låt den flyga ☁️</button></div>
       <div id="cloudzone"></div>
-      <p id="worryMsg" style="text-align:center;min-height:3em"></p>
+      <div id="worryMsg" style="text-align:center;min-height:3em;line-height:1.55"></div>
     </div>
   </section>
 
@@ -276,8 +280,9 @@
     <div class="card"><b>Vad som hjälper</b><p class="small" style="margin:2px 0">Hennes svar på ”Kändes det lite bättre?”</p><div id="pHelp"></div></div>
     <div class="card"><b>Modiga stjärnor</b><ul class="list" id="pStars"></ul></div>
     <div class="card"><b>Dagbok</b>
-      <p class="small">Hennes egna ord. Det här är hennes privata utrymme – använd det varsamt.</p>
-      <div class="row"><button class="ghost" id="pDiaryBtn">Visa dagbokstexter</button></div>
+      <p class="small">Dagboken är hennes. Här syns bara inlägg som hon själv har valt att dela med dig. Hon vet vad du kan se, eftersom det står under ”Om mig”.</p>
+      <p class="small" id="pDiaryInfo"></p>
+      <div class="row"><button class="ghost" id="pDiaryBtn">Visa delade inlägg</button></div>
       <ul class="list" id="pDiary" style="display:none"></ul></div>
     <div class="card">
       <div class="row"><button id="pCopy">📋 Kopiera sammanfattning</button><button class="ghost" id="pPin">Byt PIN</button></div>
@@ -300,6 +305,12 @@
       <p>Oro är en känsla – och känslor kommer och går, ungefär som vågor. Den känns stark ett tag, och sen blir den mindre igen.</p>
       <p>Om det känns jättejobbigt: prata med någon du litar på, som mamma, pappa eller någon vuxen i skolan.</p>
       <p class="small">Behöver du prata med någon annan? <b>BRIS</b> – ring 116 111 eller chatta på bris.se. Det är gratis.</p>
+    </div>
+    <div class="card">
+      <b>Vad ser min förälder?</b>
+      <p>Din förälder kan se hur ditt humör har varit, vilka saker du har berättat om (till exempel skolan eller magen), vilka övningar som hjälper dig och dina modiga stjärnor.</p>
+      <p><b>Din dagbok är din.</b> Din förälder kan bara läsa inlägg som du själv har valt att dela. Det du skriver i Oromolnet sparas aldrig.</p>
+      <p class="small">Om du skriver att du inte vill leva eller vill skada dig, får din förälder veta att du har haft det väldigt tungt den dagen, men inte vad du skrev. Det är för att du inte ska vara ensam med något så tungt.</p>
     </div>
   </section>
 </div>
@@ -374,7 +385,7 @@ const MESSAGES = [
   "Små steg räknas. Varje litet steg är ett riktigt steg.",
   "Din oro får åka med, men den får inte köra bussen.",
   "Du är inte ensam. Många känner sig oroliga ibland, även vuxna.",
-  "Ett ”kanske” behöver inte bli ett ”säkert”. Oftast går det helt okej.",
+  "Du behöver inte veta säkert hur det blir. Du kan klara att inte veta.",
   "Du är viktig. Precis som du är.",
   "Om tankarna snurrar: titta dig omkring och räkna fem saker du ser.",
   "Det är helt okej att ha en jobbig stund. Den tar slut.",
@@ -400,7 +411,7 @@ const MOOD_REPLY = [
 function todayKey(){ const d=new Date(); return d.getFullYear()*1000 + Math.floor((d - new Date(d.getFullYear(),0,0))/864e5); }
 function greet(){
   const h = new Date().getHours(), name = store.get('name','');
-  const g = h<10 ? "God morgon" : h<17 ? "Hej" : "God kväll";
+  const g = h<5 ? "Hej" : h<10 ? "God morgon" : h<17 ? "Hej" : "God kväll";
   document.getElementById('greet').textContent = g + (name ? ", " + name : "") + "! 💙";
   document.getElementById('dateline').textContent =
     new Date().toLocaleDateString('sv-SE',{weekday:'long',day:'numeric',month:'long'});
@@ -411,7 +422,6 @@ function showMsg(i){
   el.style.opacity = 0;
   setTimeout(()=>{ el.textContent = MESSAGES[i]; el.style.opacity = 1; }, 300);
 }
-document.getElementById('newMsg').onclick = ()=>{ msgIndex = (msgIndex + 1 + Math.floor(Math.random()*5)) % MESSAGES.length; showMsg(msgIndex); };
 
 let lastMood = null;
 document.querySelectorAll('.moods button').forEach(b=>{
@@ -421,7 +431,10 @@ document.querySelectorAll('.moods button').forEach(b=>{
     const m = +b.dataset.m; lastMood = m;
     document.getElementById('moodtxt').innerHTML = MOOD_REPLY[m] + (m>=2
       ? '<div class="row" style="margin-top:10px"><button class="ghost" onclick="go(\'talk\')">🎙️ Vill du berätta mer?</button></div>' : '');
-    const log = store.get('moods', []); log.push({d:Date.now(), m}); store.set('moods', log.slice(-400));
+    /* Flera tryck i rad räknas som en incheckning: ändrar hon sig inom 10 min ersätts den senaste */
+    const log = store.get('moods', []), last = log[log.length-1];
+    if(last && Date.now()-last.d < 10*60e3) log[log.length-1] = {d:last.d, m}; else log.push({d:Date.now(), m});
+    store.set('moods', log.slice(-400));
   };
 });
 
@@ -447,10 +460,16 @@ document.querySelectorAll('[data-go]').forEach(b=> b.onclick = ()=>go(b.dataset.
 /* ---------- Andas (4 in, 2 håll, 6 ut) ---------- */
 let bTimer=null, bRounds=0;
 const orb=document.getElementById('orb'), blabel=document.getElementById('blabel');
+const RM = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+let bTick=null;
 function phase(text, scale, secs, next){
   blabel.textContent = text;
   orb.style.transitionDuration = secs + 's';
   orb.style.transform = 'scale(' + scale + ')';
+  /* Med reducerad rörelse står bollen still, och en lugn nedräkning visar takten i stället */
+  clearInterval(bTick);
+  if(RM){ let left=secs; blabel.textContent = text+" "+left;
+    bTick=setInterval(()=>{ left--; if(left>0) blabel.textContent = text+" "+left; },1000); }
   bTimer = setTimeout(next, secs*1000);
 }
 function cycle(){
@@ -462,7 +481,7 @@ function cycle(){
     cycle();
   })));
 }
-function stopBreath(){ clearTimeout(bTimer); bTimer=null; orb.style.transitionDuration='1s'; orb.style.transform='scale(1)';
+function stopBreath(){ clearTimeout(bTimer); clearInterval(bTick); bTimer=null; orb.style.transitionDuration='1s'; orb.style.transform='scale(1)';
   blabel.textContent="Tryck start"; document.getElementById('bstart').textContent="Starta"; }
 document.getElementById('bstart').onclick = function(){
   if(bTimer){ stopBreath(); return; }
@@ -491,6 +510,10 @@ function spawn(){
   b.style.left=Math.random()*(pond.clientWidth-s)+'px'; b.style.top=pond.clientHeight+'px';
   pond.appendChild(b);
   const dur=9000+Math.random()*7000, start=performance.now(), drift=Math.random()*40-20, x0=parseFloat(b.style.left);
+  if(RM){ /* reducerad rörelse: bubblorna står stilla och försvinner efter en stund */
+    b.style.top=(30+Math.random()*(pond.clientHeight-s-40))+'px';
+    setTimeout(()=>b.remove(), dur);
+  }
   function step(t){
     if(!b.isConnected) return;
     const p=(t-start)/dur;
@@ -498,7 +521,7 @@ function spawn(){
     b.style.left=(x0 + Math.sin(p*6)*drift)+'px';
     if(p<1) requestAnimationFrame(step); else b.remove();
   }
-  requestAnimationFrame(step);
+  if(!RM) requestAnimationFrame(step);
   b.onclick=()=>{
     if(b.classList.contains('pop')) return;
     b.classList.add('pop'); tone(); popped++;
@@ -507,7 +530,7 @@ function spawn(){
     setTimeout(()=>b.remove(),260);
   };
 }
-function startBubbles(){ if(bubTimer) return; popped=0; for(let i=0;i<3;i++) setTimeout(spawn,i*700); bubTimer=setInterval(spawn,1400); }
+function startBubbles(){ if(bubTimer) return; popped=0; for(let i=0;i<3;i++) setTimeout(spawn,i*700); bubTimer=setInterval(spawn, RM?2600:1400); }
 function stopBubbles(){ clearInterval(bubTimer); bubTimer=null; pond.querySelectorAll('.bubble').forEach(b=>b.remove()); }
 document.getElementById('soundBtn').onclick=function(){ soundOn=!soundOn; this.textContent= soundOn?"🔊 Ljud: på":"🔈 Ljud: av"; if(soundOn) tone(); };
 
@@ -548,9 +571,12 @@ document.getElementById('worryGo').onclick=()=>{
   setTimeout(()=>c.classList.add('away'),600);
   const wa = analyze(txt);
   logThemes(wa);   // bara tema och ev. varning sparas – aldrig själva texten
+  if(wa.crisis){   // visas direkt, utan att vänta på molnet
+    document.getElementById('worryMsg').innerHTML = CRISIS_HTML;
+    setTimeout(()=>c.remove(),4400); return;
+  }
   setTimeout(()=>{ c.remove();
     const wm=document.getElementById('worryMsg');
-    if(wa.crisis){ wm.innerHTML="<b>Det du skrev låter väldigt tungt. 💛</b><br>Gå till en vuxen du litar på – nu direkt. Du kan också ringa <b>BRIS 116 111</b>. Om det är akut: <b>112</b>."; return; }
     wm.textContent=WORRY_REPLY[Math.floor(Math.random()*WORRY_REPLY.length)];
     setTimeout(()=>askFeedback('worry'),1500); },4400);
 };
@@ -579,6 +605,7 @@ document.getElementById('starAdd').onclick=()=>{
 /* ---------- Berätta: förstå, föreslå, lära ---------- */
 const EX = {breath:"🫧 Andas med bollen", bubbles:"🎈 Lugna bubblor", ground:"🌿 5-4-3-2-1", worry:"☁️ Oromolnet", stars:"⭐ Modiga stjärnor"};
 
+/* ANALYS-START – testas av tests/analys.test.js */
 /* Kategorier: ordstammar som känns igen, och vad som brukar passa.
    Meddelandena om magen lovar medvetet INTE att hon inte ska må illa –
    de stärker förmågan att klara känslan, vilket är det som hjälper långsiktigt. */
@@ -635,19 +662,37 @@ const CATS = {
       "Du behöver inte lösa vuxnas saker. Det är deras jobb."
     ]}
 };
-const CRISIS = ["vill dö","vill inte leva","ta livet","skada mig","vill försvinna","orkar inte leva","döda mig","skära mig"];
+/* Allvarliga formuleringar. Hellre en varning för mycket än en för lite. */
+const CRISIS = ["vill dö","vill bara dö","vill inte leva","inte vill leva","orkar inte leva","inte orkar leva",
+  "ta livet","tar livet","självmord","vill inte finnas","inte vill finnas","vill försvinna för alltid",
+  "skada mig","skadar mig","skadat mig","skära mig","skär mig","skurit mig","döda mig","dödar mig",
+  "ingen mening att leva","bättre om jag inte fanns"];
 const INTENSE = ["jätte","panik","skräck","livrädd","mycket rädd","gråter","gråta","hjärtat slår","skakar"];
+/* Ord som börjar som en ordstam men betyder något annat (”prova” är inte ”prov”, ”sjukt kul” är inte sjuk) */
+const NOT_STEM = ["prova","provar","provade","provat","provning","sjukt","vänta","väntar","väntade","väntat","väntan",
+  "vända","vänder","vände","vänt","vänster","vänstra","vänj","klassisk","klassiska","klassiker","sentimental",
+  "rasta","rastlös","nyans","nyanser"];
 const MOOD_EMO = ["😄","🙂","😐","😟","😣"];
 
-function hasStem(t, stem){ return new RegExp('(^|[^a-zåäöé])' + stem.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).test(t); }
+/* Matchar en ordstam i början av ett ord, men inte om hela ordet står i NOT_STEM */
+function hasStem(t, stem){
+  const re = new RegExp('(^|[^a-zåäöé])(' + stem.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + '[a-zåäöé]*)', 'g');
+  let m; while((m = re.exec(t))){ if(!NOT_STEM.includes(m[2])) return true; }
+  return false;
+}
 function analyze(raw){
-  const t = raw.toLowerCase();
+  const t = raw.toLowerCase().replace(/\s+/g,' ');
   return {
     cats: Object.keys(CATS).filter(c => CATS[c].ord.some(o => hasStem(t,o))),
     crisis: CRISIS.some(w => t.includes(w)),
     intense: INTENSE.some(w => t.includes(w))
   };
 }
+/* ANALYS-SLUT */
+const CRISIS_HTML = `<div class="card crisis"><b>Det du skriver låter väldigt tungt. 💛</b>
+  <p>Du ska inte behöva bära det här själv. Gå till din förälder eller en annan vuxen du litar på – nu direkt.</p>
+  <p>Du kan också ringa <b>BRIS 116 111</b> (gratis). Om det är akut: ring <b>112</b>.</p>
+  <p class="small">Din förälder får veta att du har haft det tungt i dag, men inte vad du skrev.</p></div>`;
 function logThemes(a){
   const tl=store.get('themelog',[]); tl.push({d:Date.now(), c:a.cats, x:a.crisis?1:0}); store.set('themelog', tl.slice(-500));
 }
@@ -674,15 +719,15 @@ document.getElementById('talkGo').onclick = ()=>{
   store.set('ctx', {cats:a.cats, d:Date.now()});
   logThemes(a);
   if(document.getElementById('saveDiary').checked){
-    const dl=store.get('diary',[]); dl.push({d:Date.now(), t:txt, c:a.cats, m:lastMood}); store.set('diary', dl.slice(-200));
+    const dl=store.get('diary',[]);
+    dl.push({d:Date.now(), t:txt, c:a.cats, m:lastMood, s:document.getElementById('shareDiary').checked?1:0});
+    store.set('diary', dl.slice(-200));
   }
-  inp.value=""; renderTalk(a); renderDiary();
+  inp.value=""; document.getElementById('shareDiary').checked=false; renderTalk(a); renderDiary();
 };
 function renderTalk(a){
   const out=document.getElementById('talkOut'); let h="";
-  if(a.crisis) h += `<div class="card crisis"><b>Det du skriver låter väldigt tungt. 💛</b>
-    <p>Du ska inte behöva bära det här själv. Gå till mamma, pappa eller en annan vuxen du litar på – nu direkt.</p>
-    <p>Du kan också ringa <b>BRIS 116 111</b> (gratis). Om det är akut: ring <b>112</b>.</p></div>`;
+  if(a.crisis) h += CRISIS_HTML;
   const labels = a.cats.map(c=>CATS[c].label);
   h += `<div class="card"><div class="reply">${labels.length
     ? "Tack för att du berättade. Det låter som att du känner oro för " + joinSv(labels) + ". Det är helt okej att känna så."
@@ -697,11 +742,17 @@ function renderTalk(a){
   out.querySelectorAll('[data-ex]').forEach(b => b.onclick = ()=>go(b.dataset.ex));
   out.scrollIntoView({behavior:'smooth'});
 }
+/* Dagboken är privat som standard. Hon väljer själv per inlägg om föräldern får läsa (s:1). */
 function renderDiary(){
-  const dl=store.get('diary',[]).slice().reverse(), ul=document.getElementById('diary');
-  ul.innerHTML = dl.length ? dl.slice(0,30).map(e =>
-    `<li><b>${new Date(e.d).toLocaleDateString('sv-SE',{weekday:'short',day:'numeric',month:'short'})}</b> ${e.m!=null?MOOD_EMO[e.m]:''} ${escapeHtml(e.t)}</li>`).join("")
+  const all=store.get('diary',[]), ul=document.getElementById('diary');
+  const idx = all.map((e,i)=>i).reverse().slice(0,30);
+  ul.innerHTML = idx.length ? idx.map(i => { const e=all[i]; return `<li><b>${new Date(e.d).toLocaleDateString('sv-SE',{weekday:'short',day:'numeric',month:'short'})}</b> ${e.m!=null?MOOD_EMO[e.m]:''} ${escapeHtml(e.t)}
+      <button class="share${e.s?' on':''}" data-i="${i}" aria-label="${e.s?'Delad med din förälder. Tryck för att göra den privat':'Bara din. Tryck för att dela med din förälder'}">${e.s?'👪 Delad':'🔒 Bara min'}</button></li>`; }).join("")
     : "<li>Inget här än.</li>";
+  ul.querySelectorAll('[data-i]').forEach(b => b.onclick = ()=>{
+    const dl=store.get('diary',[]), e=dl[+b.dataset.i]; if(!e) return;
+    e.s = e.s ? 0 : 1; store.set('diary', dl); renderDiary();
+  });
 }
 let clearArm=false;
 document.getElementById('clearDiary').onclick = function(){
@@ -764,18 +815,25 @@ document.getElementById('newMsg').onclick = ()=>{
 var parentOpen = false;
 let pDays = 7, pinMode = 'check', pinFirst = null, taps = [];
 const DAY = 864e5, WD = ["Sön","Mån","Tis","Ons","Tor","Fre","Lör"];
+const WDL = ["söndagar","måndagar","tisdagar","onsdagar","torsdagar","fredagar","lördagar"];
 const MCOL = ["#7cc6a0","#a8dcc0","#ffd6a5","#f6b38e","#ee9b9b"];
 const $ = id => document.getElementById(id);
 
-async function hashPin(p){
-  const s = 'lugna-stunden:' + p;
+/* PIN hashas med SHA-256 och ett slumpat salt per enhet (ls_pinsalt).
+   Utan salt används det gamla fasta saltet, så att en tidigare PIN fortsätter fungera. */
+function newSalt(){
+  try{ return Array.from(crypto.getRandomValues(new Uint8Array(16))).map(x=>x.toString(16).padStart(2,'0')).join(''); }
+  catch(e){ return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+}
+async function hashPin(p, salt){
+  const s = (salt || 'lugna-stunden') + ':' + p;
   try{
     const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
     return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');
   }catch(e){ let h=5381; for(const c of s) h=((h<<5)+h+c.charCodeAt(0))|0; return 'f'+h; }
 }
 /* Glömd PIN: öppna appen med #nollstall-pin i slutet av adressen */
-if(location.hash === '#nollstall-pin'){ store.set('pin', null); history.replaceState(null,'',location.pathname); }
+if(location.hash === '#nollstall-pin'){ store.set('pin', null); store.set('pinsalt', null); history.replaceState(null,'',location.pathname); }
 
 /* Hemlig gest: 5 snabba tryck på hälsningen (inom 3 sekunder) */
 $('greet').addEventListener('click', ()=>{
@@ -804,9 +862,14 @@ async function pinSubmit(){
   if(pinMode==='new'){ pinFirst=v; pinMode='confirm'; setPinText(); $('pinIn').value=''; err.textContent=''; return; }
   if(pinMode==='confirm'){
     if(v!==pinFirst){ pinMode='new'; setPinText(); $('pinIn').value=''; err.textContent='Koderna var olika – försök igen'; return; }
-    store.set('pin', await hashPin(v)); closePin(); parentOpen=true; go('parent'); return;
+    const salt = newSalt(); store.set('pinsalt', salt); store.set('pin', await hashPin(v, salt));
+    closePin(); parentOpen=true; go('parent'); return;
   }
-  if(await hashPin(v) === store.get('pin', null)){ closePin(); parentOpen=true; go('parent'); }
+  const salt = store.get('pinsalt', null);
+  if(await hashPin(v, salt) === store.get('pin', null)){
+    if(!salt){ const ns = newSalt(); store.set('pinsalt', ns); store.set('pin', await hashPin(v, ns)); } // flytta gammal PIN till slumpat salt
+    closePin(); parentOpen=true; go('parent');
+  }
   else { err.textContent = 'Fel kod'; $('pinIn').value=''; }
 }
 /* Lås automatiskt när appen läggs i bakgrunden */
@@ -821,7 +884,7 @@ $('pClose').onclick = ()=> go('home');
 $('pPin').onclick = ()=> openPin('new');
 $('pDiaryBtn').onclick = function(){
   const ul=$('pDiary'), show = ul.style.display==='none';
-  ul.style.display = show ? 'block' : 'none'; this.textContent = show ? 'Dölj dagbokstexter' : 'Visa dagbokstexter';
+  ul.style.display = show ? 'block' : 'none'; this.textContent = show ? 'Dölj delade inlägg' : 'Visa delade inlägg';
 };
 
 function dayStart(t){ const d=new Date(t); d.setHours(0,0,0,0); return d.getTime(); }
@@ -841,7 +904,7 @@ function renderParent(){
   // Varningar
   const cr = D.themes.filter(x=>x.x);
   $('pAlert').innerHTML = cr.length ? `<div class="card alert"><b>⚠️ Viktigt att veta</b>
-    <p>${cr.map(x=>fmt(x.d,{weekday:'long',day:'numeric',month:'long'})).join(', ')} skrev hon något som lät som allvarlig nöd
+    <p>${cap([...new Set(cr.map(x=>fmt(x.d,{weekday:'long',day:'numeric',month:'long'})))].join(', '))} skrev hon något som lät som allvarlig nöd
     (t.ex. att inte vilja leva eller att skada sig). Appen visade henne BRIS och 112.</p>
     <p>Prata lugnt med henne, och kontakta gärna BUP, elevhälsan eller vårdcentralen. Vid akut oro: ring <b>112</b>.
     Stöd för dig som förälder: <b>1177</b>.</p></div>` : '';
@@ -869,7 +932,7 @@ function renderParent(){
   const worst = wk.filter(x=>x.n>=2).sort((p,q)=>q.v-p.v)[0];
   $('pWeek').innerHTML = D.moods.length ? wk.map(x => x.v===null ? hbar(WD[x.w],0,5,'–')
       : hbar(WD[x.w] + (worst && worst.w===x.w && worst.v>=2 ? ' ⚠️' : ''), 5-x.v, 5, MOOD_EMO[Math.round(x.v)], MCOL[Math.round(x.v)])).join('')
-      + (worst && worst.v>=2 ? `<p class="small">${WD[worst.w]}ar verkar vara tyngst.</p>` : '')
+      + (worst && worst.v>=2 ? `<p class="small">${cap(WDL[worst.w])} verkar vara tyngst.</p>` : '')
     : '<p class="small">Inga incheckningar ännu.</p>';
 
   // Teman
@@ -889,11 +952,16 @@ function renderParent(){
   const st = D.stars.slice(-5).reverse();
   $('pStars').innerHTML = st.length ? st.map(s => `<li><b>${fmt(s.d)}</b> ⭐ ${escapeHtml(s.t)}</li>`).join('') : '<li>Inga stjärnor ännu.</li>';
 
-  // Dagbok
-  const dl = D.diary.slice().reverse();
-  $('pDiary').innerHTML = dl.length ? dl.map(e => `<li><b>${fmt(e.d,{weekday:'short',day:'numeric',month:'short'})}</b>
-      ${e.m!=null?MOOD_EMO[e.m]:''} ${escapeHtml(e.t)}${e.c&&e.c.length?' <i>('+e.c.map(c=>CATS[c].label).join(', ')+')</i>':''}</li>`).join('')
-    : '<li>Inget sparat under perioden.</li>';
+  // Dagbok: bara inlägg som hon själv har delat. Listan döljs varje gång vyn ritas om.
+  const shared = D.diary.filter(e => e.s).reverse();
+  $('pDiaryInfo').textContent = D.diary.length
+    ? `${D.diary.length} inlägg under perioden, varav ${shared.length} ${shared.length===1?'är delat':'är delade'} med dig.`
+    : 'Inga dagboksinlägg under perioden.';
+  $('pDiary').style.display = 'none';
+  $('pDiaryBtn').textContent = 'Visa delade inlägg';
+  $('pDiaryBtn').parentNode.style.display = shared.length ? 'flex' : 'none';
+  $('pDiary').innerHTML = shared.map(e => `<li><b>${fmt(e.d,{weekday:'short',day:'numeric',month:'short'})}</b>
+      ${e.m!=null?MOOD_EMO[e.m]:''} ${escapeHtml(e.t)}${e.c&&e.c.length?' <i>('+e.c.map(c=>CATS[c].label).join(', ')+')</i>':''}</li>`).join('');
   $('pCopyMsg').textContent = ''; $('pCopyBox').style.display='none';
 }
 
