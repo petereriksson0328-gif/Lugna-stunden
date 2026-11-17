@@ -1,0 +1,74 @@
+# Publicerar appen på GitHub Pages:
+#   main  → https://<användare>.github.io/Lugna-stunden/        (den riktiga appen)
+#   test  → https://<användare>.github.io/Lugna-stunden/test/   (testversionen)
+# Om grenen "test" inte finns publiceras main även som testversion.
+# Kräver en gång: Settings → Pages → Source: "GitHub Actions".
+name: Publicera appen
+
+on:
+  push:
+    branches: [main, test]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hämta main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: main
+
+      - name: Välj gren för testversionen
+        run: |
+          if git -C main ls-remote --exit-code --heads origin test >/dev/null 2>&1; then
+            echo "TEST_REF=test" >> "$GITHUB_ENV"
+          else
+            echo "TEST_REF=main" >> "$GITHUB_ENV"
+          fi
+
+      - name: Hämta testversionen (${{ env.TEST_REF }})
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TEST_REF }}
+          path: test
+
+      - name: Testa textanalysen
+        run: |
+          node main/tests/analys.test.js
+          node test/tests/analys.test.js
+
+      - name: Bygg webbplatsen
+        run: |
+          mkdir -p _site/test
+          cp -r main/index.html main/manifest.json main/sw.js main/icons _site/
+          cp -r test/index.html test/manifest.json test/sw.js test/icons _site/test/
+          # Testversionen får ett eget namn på hemskärmen
+          sed -i 's/"name": "Lugna Stunden"/"name": "Lugna Stunden TEST"/; s/"short_name": "Lugna Stunden"/"short_name": "LS TEST"/' _site/test/manifest.json
+          grep -q "LS TEST" _site/test/manifest.json
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -68,6 +68,7 @@ Vyn låses automatiskt när appen stängs eller läggs i bakgrunden.
 ## Filer
 ```
 index.html          appen
+.github/workflows/  publicerar main och test på GitHub Pages
 manifest.json       gör att den kan installeras som app
 sw.js               service worker – offline + installation
 icons/              appikoner (192, 512, maskable 512, apple-touch 180)
@@ -83,10 +84,30 @@ När hon öppnar länken första gången kommer frågan **"Vill du spara appen p
 Efter installationen fungerar appen även utan internet. **Om du ändrar i appen** behöver du höja `VERSION` i `sw.js` (t.ex. från `lugna-v3` till `lugna-v4`). Då hämtar telefonen den nya versionen. Den syns när appen öppnas nästa gång.
 
 ## Publicera på GitHub Pages
-1. Lägg alla filer ovan (även mappen `icons`) i ett repository.
-2. Gå till **Settings → Pages**.
-3. Välj **Deploy from a branch**, branch `main` och mapp `/ (root)`, och spara.
-4. Efter någon minut ligger appen på `https://<användarnamn>.github.io/<repo>/`.
+Appen publiceras automatiskt av GitHub Actions (`.github/workflows/pages.yml`).
+
+**En gång:** gå till **Settings → Pages** och välj **Source: GitHub Actions**.
+
+Efter det gäller följande:
+- grenen `main` publiceras som den riktiga appen: `https://<användarnamn>.github.io/<repo>/`
+- grenen `test` publiceras som testversionen: `https://<användarnamn>.github.io/<repo>/test/`
+
+Innan något publiceras körs testet av textanalysen. Om testet misslyckas publiceras ingenting.
+
+## Testmiljö
+Testa nya saker på din egen telefon innan de når hennes:
+
+1. Ändringar läggs först på grenen `test`.
+2. Öppna `…/Lugna-stunden/test/` på din telefon. Testversionen känns igen på den gula knappen **🧪 TEST · verktyg**. Den kan läggas till på hemskärmen och heter då "LS TEST".
+3. Testa. Under **🧪 TEST · verktyg** finns:
+   - **Fyll med exempeldata (30 dagar)**, så att föräldravyn har något att visa
+   - **Lägg till en varning**, för att se hur varningsrutan ser ut
+   - **Låtsas att en vecka gått**, för att se påminnelsen om att skicka
+   - **Skapa och läs in en exempelrapport**, för att testa föräldratelefonen med en enda telefon
+   - **Börja om från första starten** och **Rensa all testdata**
+4. När allt känns bra slås `test` ihop med `main`. Då uppdateras hennes app.
+
+Testversionen sparar sina data separat (`ls_test_…`) och har en egen cache. Den blandas aldrig ihop med den riktiga appen, inte ens på samma telefon. Vill du testa två telefoner med bara en telefon kan du använda två olika webbläsare, till exempel Safari som barnet och Chrome som förälder.
 
 **Tips:** Öppna länken i Safari/Chrome på mobilen och välj **Lägg till på hemskärmen**, så känns den som en riktig app.
 

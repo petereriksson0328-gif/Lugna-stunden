@@ -18,7 +18,7 @@ Appen ska göra vardagen lite lättare. Den ersätter inte vård (BUP eller tera
 
 ## Teknik (krav)
 - Ren HTML, CSS och JavaScript. **Inget ramverk, inget byggsteg.** All appkod ligger i `index.html`.
-- Hostas på **GitHub Pages**. Använd bara relativa sökvägar (`./`), eftersom appen ligger under `/<repo>/`.
+- Hostas på **GitHub Pages** via GitHub Actions: `main` = riktiga appen, `test` = testversionen på `./test/`. Testversionen känns igen på adressen (`IS_TEST`), sparar under `ls_test_`, visar "🧪 TEST · verktyg" och har en egen cache i service workern. Nya ändringar går till `test` först. Använd bara relativa sökvägar (`./`), eftersom appen ligger under `/<repo>/`.
 - **Ingen backend och ingen extern AI-tjänst.** All analys sker lokalt. Data lämnar bara telefonen när hon själv skickar en krypterad rapport till förälderns telefon (se Två telefoner).
 - Data sparas i `localStorage` via ett `store`-objekt med try/catch. Alla nycklar har prefixet `ls_`.
 - PWA:
@@ -33,6 +33,7 @@ manifest.json
 sw.js
 icons/            icon-192.png, icon-512.png, icon-maskable-512.png, apple-touch-icon.png
 README.md
+.github/workflows/pages.yml   publicerar main på ./ och test på ./test/
 tests/analys.test.js   test av textanalysen (node tests/analys.test.js)
 ```
 
