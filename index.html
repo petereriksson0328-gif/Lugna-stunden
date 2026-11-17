@@ -125,6 +125,13 @@
   .musicchip{position:fixed;top:calc(10px + env(safe-area-inset-top));right:12px;z-index:30;background:#fff;color:var(--ink);
              font-size:.85rem;padding:8px 14px;box-shadow:0 4px 16px #6a7fa033;display:none}
   .musicchip.on{display:block}
+  /* Testversionen */
+  .testchip{position:fixed;top:calc(10px + env(safe-area-inset-top));left:12px;z-index:30;background:#ffd166;color:#3b2f00;
+            font-size:.8rem;padding:7px 12px;box-shadow:0 4px 16px #6a7fa033;display:none}
+  body.is-test .testchip{display:block}
+  body.is-test .wrap{padding-top:54px}
+  .tools{display:grid;gap:8px;margin:12px 0}
+  .tools button{text-align:left;border-radius:14px;padding:12px 14px}
   .tag{font-size:.75rem;background:var(--a3);border-radius:999px;padding:2px 8px;margin-left:6px;font-weight:600}
   .reply{background:#fff;border-radius:16px;padding:14px;margin:10px 0;line-height:1.5}
   .crisis{background:#fff1e6;border:2px solid var(--a4)}
@@ -448,6 +455,23 @@
 
 <div class="toast" id="toast" role="status"></div>
 <button class="musicchip" id="musicChip">🎵 Stoppa musiken</button>
+<button class="testchip" id="testChip">🧪 TEST · verktyg</button>
+<div class="install-bg" id="testBg">
+  <div class="install" style="text-align:left;max-height:85vh;overflow:auto">
+    <h3 style="text-align:center">🧪 Testverktyg</h3>
+    <p class="small" style="text-align:center;margin:0">Det här är testversionen. Allt sparas separat från den riktiga appen, även på samma telefon.</p>
+    <div class="tools">
+      <button class="ghost" data-t="demo">📊 Fyll med exempeldata (30 dagar)</button>
+      <button class="ghost" data-t="alert">⚠️ Lägg till en varning, för att se hur den ser ut</button>
+      <button class="ghost" data-t="week">📅 Låtsas att en vecka gått sedan rapporten skickades</button>
+      <button class="ghost" data-t="report">📥 Skapa och läs in en exempelrapport (föräldratelefon)</button>
+      <button class="ghost" data-t="fresh">👋 Börja om från första starten</button>
+      <button class="ghost" data-t="wipe">🗑️ Rensa all testdata</button>
+    </div>
+    <p class="small" id="testInfo"></p>
+    <div class="row"><button id="testClose">Stäng</button></div>
+  </div>
+</div>
 
 <div class="fb" id="fb">
   <p>Kändes det lite bättre?</p>
@@ -464,9 +488,12 @@
 
 <script>
 /* ---------- Lagring (säker) ---------- */
+/* Testversionen (…/test/) sparar under ls_test_, så den aldrig blandas ihop med riktiga data på samma telefon */
+const IS_TEST = /\/test\/(index\.html)?$/.test(location.pathname);
+const PFX = IS_TEST ? 'ls_test_' : 'ls_';
 const store = {
-  get(k, d){ try{ const v = localStorage.getItem('ls_'+k); return v===null ? d : JSON.parse(v);}catch(e){return d;} },
-  set(k, v){ try{ localStorage.setItem('ls_'+k, JSON.stringify(v)); }catch(e){} }
+  get(k, d){ try{ const v = localStorage.getItem(PFX+k); return v===null ? d : JSON.parse(v);}catch(e){return d;} },
+  set(k, v){ try{ localStorage.setItem(PFX+k, JSON.stringify(v)); }catch(e){} }
 };
 
 /* ---------- Meddelanden ---------- */
@@ -1613,6 +1640,56 @@ function showWelcome(step){
 }
 
 /* ---------- Start ---------- */
+/* ---------- Testversionen: märkning och testverktyg (bara på …/test/) ---------- */
+function demoData(){
+  const now = Date.now(), cats = Object.keys(CATS), exs = Object.keys(EX);
+  const moods = [], themelog = [], fblog = [], w = {allt:{}};
+  for(let i=29;i>=0;i--){
+    const d = dayStart(now) - i*DAY + 7.5*3600e3 + Math.random()*3600e3, wd = new Date(d).getDay();
+    if(Math.random() < 0.85) moods.push({d, m: Math.max(0, Math.min(4, Math.round(1.4 + (wd===1 ? 1.3 : 0) + (Math.random()*2-1))))});
+    if(Math.random() < 0.55) themelog.push({d: d+3600e3, c:[pick(cats)].concat(Math.random()<.3 ? [pick(cats)] : []).filter((x,j,a)=>a.indexOf(x)===j), x:0});
+    if(Math.random() < 0.45){ const e = pick(exs), v = pick([2,2,1,-1]); fblog.push({d: d+2*3600e3, e, v}); w.allt[e] = (w.allt[e]||0) + v; }
+  }
+  const T = [["Orolig för provet i matte imorgon",["skola"],1],["Jag sov dåligt och var trött hela dagen",["somn"],0],
+             ["Magen kändes konstig på bussen",["kropp","nytt"],1],["Det var bråk på rasten",["kompisar","skola"],0],
+             ["Jag var rädd att komma sent",["tid"],0],["Kalaset på lördag känns pirrigt",["nytt"],1]];
+  const diary = T.map(([t,c,s],i) => ({d: now - (26 - i*5)*DAY, t, c, m: pick([1,2,3]), s}));
+  const stars = ["Jag åt lunch i matsalen","Jag gick på kalaset","Jag pratade inför klassen","Jag åkte buss själv","Jag sa till en vuxen när magen kändes konstig"]
+    .map((t,i) => ({t, d: now - (24 - i*5)*DAY}));
+  return {moods, themelog, fblog, w, diary, stars};
+}
+function testTool(t){
+  const info = $('testInfo');
+  if(t === 'demo'){ const D = demoData(); ['moods','themelog','fblog','w','diary','stars'].forEach(k => store.set(k, D[k]));
+    if(!store.get('name','')) store.set('name','Testbarn');
+    greet(); renderInsight(); info.textContent = 'Klart! Öppna föräldravyn för att se statistiken.'; }
+  if(t === 'alert'){ const tl = store.get('themelog',[]); tl.push({d: Date.now() - 2*DAY, c:[], x:1}); store.set('themelog', tl);
+    info.textContent = 'En varning har lagts till för två dagar sedan. Öppna föräldravyn.'; }
+  if(t === 'week'){ if(!store.get('paircode',null)){ info.textContent = 'Koppla ihop med en kod först (🙂 Jag → Dela med min förälder).'; return; }
+    store.set('lastsent', Date.now() - 8*DAY); store.set('nudgeNo', 0); go('home'); closeTest(); toast('Påminnelsen visas nu på startsidan.'); return; }
+  if(t === 'report'){
+    if(!isParentPhone()){ info.textContent = 'Gör först den här telefonen till föräldratelefon: välj "Jag är förälder → Min egen telefon", eller "Gör den här till föräldratelefon" i föräldravyn.'; return; }
+    const D = demoData(), rep = {v:1, at:Date.now(), name:'Testbarn', moods:D.moods, themelog:D.themelog, fblog:D.fblog, stars:D.stars,
+      diary: D.diary.map(e => e.s ? {d:e.d, t:e.t, c:e.c, m:e.m, s:1} : {d:e.d, s:0})};
+    const code = store.get('paircode', null);
+    sealReport(code, rep).then(txt => openReport(code, txt)).then(r => { store.set('remote', r);
+      info.textContent = 'Exempelrapporten är krypterad, avkrypterad och inläst. Öppna föräldravyn.'; })
+      .catch(() => { info.textContent = 'Det gick inte att skapa rapporten.'; });
+  }
+  if(t === 'fresh' || t === 'wipe'){
+    if(!confirm(t === 'fresh' ? 'Rensa testdata och börja om från första starten?' : 'Rensa all testdata?')) return;
+    try{ Object.keys(localStorage).filter(k => k.startsWith('ls_test_')).forEach(k => localStorage.removeItem(k)); }catch(e){}
+    location.reload();
+  }
+}
+function closeTest(){ $('testBg').classList.remove('on'); }
+if(IS_TEST){
+  document.body.classList.add('is-test'); document.title = 'Lugna Stunden TEST';
+  $('testChip').onclick = ()=>{ $('testInfo').textContent = ''; $('testBg').classList.add('on'); };
+  $('testClose').onclick = closeTest;
+  document.querySelectorAll('[data-t]').forEach(b => b.onclick = ()=> testTool(b.dataset.t));
+}
+
 greet(); showMsg(msgIndex); renderInsight(); renderNudge();
 if(setupDone() && isParentPhone()) setTimeout(()=> openPin(), 400);   // förälderns telefon öppnar direkt till PIN
 if(!setupDone()){

@@ -1,7 +1,15 @@
 /* Lugna Stunden – service worker
    Gör att appen kan installeras och fungerar utan internet.
    Höj VERSION när du ändrar något, så hämtas nya filer. */
-const VERSION = 'lugna-v7';
+const VERSION = 'lugna-v8';
+
+/* Den riktiga appen (…/Lugna-stunden/) och testversionen (…/Lugna-stunden/test/) ligger på samma domän.
+   Varje version har därför en egen cache, märkt med sin adress, och rör aldrig den andras. */
+const SCOPE = self.registration.scope;
+const IS_TEST = /\/test\/$/.test(SCOPE);
+const CACHE = VERSION + '@' + SCOPE;
+const TEST_PATH = new URL('./test/', SCOPE).pathname;
+
 const FILES = [
   './',
   './index.html',
@@ -13,13 +21,16 @@ const FILES = [
 ];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== VERSION).map(k => caches.delete(k))))
+      .then(keys => Promise.all(keys
+        /* ta bort gamla versioner av den egna cachen (och gamla cachar utan adress, från före testmiljön) */
+        .filter(k => k !== CACHE && (k.endsWith('@' + SCOPE) || (!IS_TEST && !k.includes('@'))))
+        .map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -27,8 +38,10 @@ self.addEventListener('activate', e => {
 /* Visa sparad version direkt, hämta en ny i bakgrunden till nästa gång */
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET' || !e.request.url.startsWith(self.location.origin)) return;
+  /* Den riktiga appens service worker lägger sig inte i testversionen */
+  if (!IS_TEST && new URL(e.request.url).pathname.startsWith(TEST_PATH)) return;
   e.respondWith(
-    caches.open(VERSION).then(cache =>
+    caches.open(CACHE).then(cache =>
       cache.match(e.request, { ignoreSearch: true }).then(cached => {
         const fresh = fetch(e.request).then(res => {
           if (res && res.ok) cache.put(e.request, res.clone());
