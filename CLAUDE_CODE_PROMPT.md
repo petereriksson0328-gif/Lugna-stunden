@@ -50,7 +50,8 @@ tests/analys.test.js   test av textanalysen (node tests/analys.test.js)
    - hälsning efter tid på dygnet, med hennes namn
    - "Dagens tanke", där samma tanke visas hela dagen; 40 meddelanden i listan `MESSAGES`, plus knappen "En tanke till"
    - humörkoll med 5 emojis, med ett vänligt svar; vid 😐, 😟 eller 😣 erbjuds "Vill du berätta mer?"
-2. **Andas med bollen:** en boll som växer och krymper, 4 s in, 2 s håll, 6 s ut.
+2. **🌬️ Lugna-knappen** (överst på Hem, även från 😣 och vid stark känsla i Berätta): andningstriangeln startar direkt (in 4 s, håll 2 s, ut 6 s, pricken går runt triangeln; med reducerad rörelse lyser sidan i stället). Efter 5 andetag: "Hur känns det nu?" → Lite bättre (beröm + lugna förslag) eller Fortfarande jättejobbigt (kallt vatten, fötterna i golvet, säg till en vuxen). Loggas i `sos` [{d, r, f}] och visas i föräldravyn (antal, tid, utfall, "oftast på morgonen"), i rapporten och i sammanfattningen.
+2b. **Andas med bollen:** en boll som växer och krymper, 4 s in, 2 s håll, 6 s ut.
 3. **Lugna bubblor:** bubblor som flyter sakta och kan poppas. Ljudet är valfritt och använder en pentatonisk skala via Web Audio.
 4. **5-4-3-2-1:** grounding med sinnena.
 5. **Oromolnet:** hon skriver en oro och den flyger iväg. **Texten sparas aldrig**, bara tema och eventuell varning.
@@ -95,7 +96,7 @@ tests/analys.test.js   test av textanalysen (node tests/analys.test.js)
 - "Kopiera sammanfattning": en text **utan dagbokstexter** som kan delas med BUP eller en terapeut.
 
 ### localStorage-nycklar (prefix `ls_`)
-`name`, `moods` [{d,m}], `diary` [{d,t,c,m,s}] (s=1 om delad med föräldern), `themelog` [{d,c,x}], `fblog` [{d,e,v}], `w` (inlärningspoäng {tema:{övning:poäng}}, inkl. `allt`), `ctx` (senaste teman), `stars` [{t,d}], `pin` (hash), `pinsalt`, `installNo`, `setup` (1 när välkomsten är klar), `role` (`parent` på förälderns telefon), `paircode`, `pairedat`, `lastsent`, `nudgeNo`, `remote` (senast inlästa rapporten), `music` [{n,u}] (egna Spotify-listor)
+`name`, `moods` [{d,m}], `diary` [{d,t,c,m,s}] (s=1 om delad med föräldern), `themelog` [{d,c,x}], `fblog` [{d,e,v}], `w` (inlärningspoäng {tema:{övning:poäng}}, inkl. `allt`), `ctx` (senaste teman), `stars` [{t,d}], `pin` (hash), `pinsalt`, `installNo`, `setup` (1 när välkomsten är klar), `role` (`parent` på förälderns telefon), `paircode`, `pairedat`, `lastsent`, `nudgeNo`, `remote` (senast inlästa rapporten), `music` [{n,u}] (egna Spotify-listor), `sos` [{d,r,f}] (Lugna-knappen: tid, andetag, f = b bättre / s fortfarande jobbigt)
 
 ## Uppgift nu
 1. Läs igenom mitt repository och jämför det med specifikationen ovan.
