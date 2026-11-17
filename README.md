@@ -26,6 +26,7 @@ Din telefon frågar efter PIN varje gång appen öppnas. Har du redan använt ap
 ## Innehåll
 - **Dagens tanke** – ett positivt, lugnande meddelande (samma hela dagen, med en knapp för fler)
 - **Hur känns det idag?** – en enkel incheckning med ett vänligt svar
+- **🌬️ Lugna-knappen** – överst på startsidan, för när det känns jättejobbigt. Andningstriangeln startar direkt: en prick går runt en triangel (andas in 4 s, håll 2 s, andas ut långsamt 6 s). Efter 5 andetag frågar appen hur det känns. Om det fortfarande är jättejobbigt kommer nästa steg: kallt vatten över händerna, fötterna i golvet och vad hon kan säga till en vuxen. Knappen nås också från 😣 i humörkollen och från Berätta när känslan låter stark.
 - **Andas med bollen** – andning 4 s in, 2 s håll, 6 s ut
 - **Lugna bubblor** – bubblor som flyter sakta och går att poppa, utan poäng eller tidspress (mjukt ljud om man vill)
 - **5-4-3-2-1** – en sinnesövning för att landa i nuet
@@ -53,6 +54,7 @@ Namn, stjärnor och humör sparas bara lokalt i webbläsaren (localStorage). Ing
 
 Visar för 7 eller 30 dagar:
 - humör per dag och per veckodag (tyngsta dagen markeras)
+- **Lugna-knappen**: hur ofta den används, dag och klockslag, om det kändes bättre efteråt och när på dagen det oftast händer
 - vad oron handlar om (teman)
 - vilka övningar som hjälper enligt hennes egna svar
 - modiga stjärnor
@@ -81,7 +83,7 @@ När hon öppnar länken första gången kommer frågan **"Vill du spara appen p
 - **iPhone/iPad:** Apple tillåter inte att en webbsida installerar sig själv. "Ja" visar därför tre enkla steg via Dela-knappen → *Lägg till på hemskärmen*.
 - Svarar hon "Nej" frågar appen igen om 3 dagar. När appen väl är installerad visas frågan aldrig mer.
 
-Efter installationen fungerar appen även utan internet. **Om du ändrar i appen** behöver du höja `VERSION` i `sw.js` (t.ex. från `lugna-v3` till `lugna-v4`). Då hämtar telefonen den nya versionen. Den syns när appen öppnas nästa gång.
+Efter installationen fungerar appen även utan internet. **Om du ändrar i appen** behöver du höja `VERSION` i `sw.js` (t.ex. från `lugna-v3` till `lugna-v4`). Själva sidan hämtas alltid ny när telefonen har internet, så en ny version syns direkt när appen öppnas eller laddas om. Utan internet visas den sparade versionen.
 
 ## Publicera på GitHub Pages
 Appen publiceras automatiskt av GitHub Actions (`.github/workflows/pages.yml`).
@@ -94,12 +96,15 @@ Efter det gäller följande:
 
 Innan något publiceras körs testet av textanalysen. Om testet misslyckas publiceras ingenting.
 
+GitHub tillåter bara publicering från `main`. En push till `test` startar därför publiceringen på `main`, som tar med båda grenarna. Det sker automatiskt, men det syns som två körningar under Actions.
+
 ## Testmiljö
 Testa nya saker på din egen telefon innan de når hennes:
 
 1. Ändringar läggs först på grenen `test`.
 2. Öppna `…/Lugna-stunden/test/` på din telefon. Testversionen känns igen på den gula knappen **🧪 TEST · verktyg**. Den kan läggas till på hemskärmen och heter då "LS TEST".
 3. Testa. Under **🧪 TEST · verktyg** finns:
+   - **📅 Testklocka**: låtsas att det är en annan dag (−7, −1, +1 dag eller tillbaka till idag). Allt du gör får då det datumet, så du kan bygga upp egna mönster över flera dagar. Märkningen visar vilken dag appen låtsas att det är.
    - **Fyll med exempeldata (30 dagar)**, så att föräldravyn har något att visa
    - **Lägg till en varning**, för att se hur varningsrutan ser ut
    - **Låtsas att en vecka gått**, för att se påminnelsen om att skicka

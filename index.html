@@ -126,6 +126,17 @@
   .musicchip{position:fixed;top:calc(10px + env(safe-area-inset-top));right:12px;z-index:30;background:#fff;color:var(--ink);
              font-size:.85rem;padding:8px 14px;box-shadow:0 4px 16px #6a7fa033;display:none}
   .musicchip.on{display:block}
+  /* Lugna-knappen */
+  .sosbtn{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border-radius:20px;padding:14px 16px;margin:4px 0 2px;
+          background:linear-gradient(135deg,#dff3ff,#ece6fb);color:var(--ink);box-shadow:0 4px 14px #6a7fa01a}
+  .sosbtn .ic{font-size:1.9rem}
+  .sosbtn small{display:block;font-weight:600;color:var(--soft)}
+  .soscard{background:linear-gradient(160deg,#2f3a5c,#4b4680);border-radius:var(--r);padding:14px 12px 18px;color:#fff;text-align:center}
+  .soscard svg{width:100%;max-width:320px;height:auto;display:block;margin:0 auto}
+  .sosphase{font-size:1.45rem;font-weight:800;min-height:1.6em;margin-top:4px}
+  .soscount{opacity:.8;font-size:.9rem}
+  .steplist{display:grid;gap:10px}
+  .steplist div{background:#fff;border-radius:16px;padding:12px 14px;line-height:1.5;box-shadow:0 3px 10px #6a7fa014}
   /* Testversionen */
   .testchip{position:fixed;top:calc(10px + env(safe-area-inset-top));left:12px;z-index:30;background:#ffd166;color:#3b2f00;
             font-size:.8rem;padding:7px 12px;box-shadow:0 4px 16px #6a7fa033;display:none}
@@ -197,6 +208,7 @@
   <section class="screen on" id="s-home">
     <h1 id="greet">Hej!</h1>
     <p class="sub" id="dateline"></p>
+    <button class="sosbtn" data-go="sos"><span class="ic">🌬️</span><span><b>Jättejobbigt just nu?</b><small>Tryck här, så lugnar vi ner kroppen tillsammans</small></span></button>
 
     <div class="card"><div class="msg" id="daily"></div>
       <div class="row"><button class="ghost" id="newMsg">✨ En tanke till</button></div>
@@ -311,6 +323,29 @@
     <p class="small" id="starcount" style="text-align:center"></p>
   </section>
 
+  <!-- LUGNA-KNAPPEN -->
+  <section class="screen" id="s-sos">
+    <button class="ghost backbtn" data-back>← Tillbaka</button>
+    <h2>🌬️ Vi tar det här tillsammans</h2>
+    <p class="sub" style="margin-bottom:10px">Det här är oro. Den är jobbig, men den går över – som en våg. Följ pricken runt triangeln.</p>
+    <div class="soscard">
+      <svg viewBox="0 0 300 270" aria-hidden="true">
+        <polygon points="150,22 282,250 18,250" fill="none" stroke="#ffffff22" stroke-width="10" stroke-linejoin="round"/>
+        <line id="sosL0" x1="18" y1="250" x2="150" y2="22" stroke="#ffffff40" stroke-width="6" stroke-linecap="round"/>
+        <line id="sosL1" x1="150" y1="22" x2="282" y2="250" stroke="#ffffff40" stroke-width="6" stroke-linecap="round"/>
+        <line id="sosL2" x1="282" y1="250" x2="18" y2="250" stroke="#ffffff40" stroke-width="6" stroke-linecap="round"/>
+        <text x="62" y="128" fill="#ffffffaa" font-size="15" font-weight="700" text-anchor="middle" transform="rotate(-60 62 128)">andas in · 4</text>
+        <text x="238" y="128" fill="#ffffffaa" font-size="15" font-weight="700" text-anchor="middle" transform="rotate(60 238 128)">håll · 2</text>
+        <text x="150" y="243" fill="#ffffffaa" font-size="15" font-weight="700" text-anchor="middle">andas ut långsamt · 6</text>
+        <circle id="sosDot" cx="18" cy="250" r="13" fill="#fff" style="filter:drop-shadow(0 0 10px #a8d8ff)"/>
+      </svg>
+      <div class="sosphase" id="sosPhase">Andas in…</div>
+      <div class="soscount" id="sosCount"></div>
+    </div>
+    <div id="sosNext" style="margin-top:14px"></div>
+    <div class="row" style="margin-top:12px"><button class="ghost" id="sosStop">Jag är klar</button></div>
+  </section>
+
   <!-- SPEL -->
   <section class="screen" id="s-games">
     <button class="ghost backbtn" data-back>← Tillbaka</button>
@@ -389,11 +424,13 @@
     <div class="card" id="pTwo"></div>
     <div class="seg"><button data-p="7">7 dagar</button><button data-p="30" class="ghost">30 dagar</button></div>
     <div id="pAlert"></div>
+    <div id="pHint"></div>
     <div class="card"><div class="kpis" id="pKpis"></div></div>
     <div class="card"><b>Humör per dag</b><p class="small" style="margin:2px 0">Högre stapel = bättre dag. Grått = ingen incheckning.</p>
       <div class="bars" id="pBars"></div><div class="blabels" id="pBl"></div></div>
     <div class="card"><b>Veckodagar</b><p class="small" style="margin:2px 0">Genomsnittligt humör per veckodag</p><div id="pWeek"></div></div>
     <div class="card"><b>Vad oron handlar om</b><p class="small" style="margin:2px 0">Teman från Berätta och Oromolnet</p><div id="pThemes"></div></div>
+    <div class="card"><b>🌬️ Lugna-knappen</b><p class="small" style="margin:2px 0">När det kändes jättejobbigt och hon tryckte på knappen</p><div id="pSos"></div></div>
     <div class="card"><b>Vad som hjälper</b><p class="small" style="margin:2px 0">Hennes svar på ”Kändes det lite bättre?”</p><div id="pHelp"></div></div>
     <div class="card"><b>Modiga stjärnor</b><ul class="list" id="pStars"></ul></div>
     <div class="card"><b>Dagbok</b>
@@ -425,7 +462,7 @@
     </div>
     <div class="card">
       <b>Vad ser min förälder?</b>
-      <p>Din förälder kan se hur ditt humör har varit, vilka saker du har berättat om (till exempel skolan eller magen), vilka övningar som hjälper dig och dina modiga stjärnor.</p>
+      <p>Din förälder kan se hur ditt humör har varit, vilka saker du har berättat om (till exempel skolan eller magen), vilka övningar som hjälper dig, hur ofta du använder 🌬️ Lugna-knappen och dina modiga stjärnor.</p>
       <p><b>Din dagbok är din.</b> Din förälder kan bara läsa inlägg som du själv har valt att dela. Det du skriver i Oromolnet sparas aldrig.</p>
       <p>Om din förälder har appen på sin egen telefon skickas ingenting dit förrän <b>du</b> trycker på Skicka.</p>
       <p class="small">Det du skriver om oro, till exempel om skolan eller magen, syns bara som ett ämne. Bara om något låter riktigt allvarligt får din förälder veta att du har haft en tung dag, men inte vad du skrev. Det är för att du inte ska behöva vara ensam med det.</p>
@@ -472,6 +509,16 @@
     <h3 style="text-align:center">🧪 Testverktyg</h3>
     <p class="small" style="text-align:center;margin:0">Det här är testversionen. Allt sparas separat från den riktiga appen, även på samma telefon.</p>
     <div class="tools">
+      <div style="background:#fff7dc;border-radius:14px;padding:12px 14px">
+        <b>📅 Testklocka</b>
+        <p class="small" style="margin:4px 0 8px" id="clockTxt"></p>
+        <div class="row" style="justify-content:flex-start;gap:6px">
+          <button class="ghost" data-shift="-7" style="padding:8px 12px">−7 dagar</button>
+          <button class="ghost" data-shift="-1" style="padding:8px 12px">−1 dag</button>
+          <button class="ghost" data-shift="1" style="padding:8px 12px">+1 dag</button>
+          <button class="ghost" data-shift="0" style="padding:8px 12px">Idag</button>
+        </div>
+      </div>
       <button class="ghost" data-t="demo">📊 Fyll med exempeldata (30 dagar)</button>
       <button class="ghost" data-t="alert">⚠️ Lägg till en varning, för att se hur den ser ut</button>
       <button class="ghost" data-t="week">📅 Låtsas att en vecka gått sedan rapporten skickades</button>
@@ -507,6 +554,17 @@ const store = {
   get(k, d){ try{ const v = localStorage.getItem(PFX+k); return v===null ? d : JSON.parse(v);}catch(e){return d;} },
   set(k, v){ try{ localStorage.setItem(PFX+k, JSON.stringify(v)); }catch(e){} }
 };
+
+/* Testklocka (bara i testversionen): låtsas att det är en annan dag, så att egna inlägg
+   hamnar på olika datum och mönster syns i föräldravyn. Påverkar allt som använder Date. */
+const DAYSHIFT = IS_TEST ? (+store.get('dayshift', 0) || 0) : 0;
+if(DAYSHIFT){
+  const RealDate = Date, shift = DAYSHIFT * 864e5;
+  window.Date = class extends RealDate {
+    constructor(...a){ if(a.length) super(...a); else super(RealDate.now() + shift); }
+    static now(){ return RealDate.now() + shift; }
+  };
+}
 
 /* ---------- Meddelanden ---------- */
 const MESSAGES = [
@@ -583,7 +641,8 @@ document.querySelectorAll('.moods button').forEach(b=>{
     b.classList.add('sel');
     const m = +b.dataset.m; lastMood = m;
     document.getElementById('moodtxt').innerHTML = MOOD_REPLY[m] + (m>=2
-      ? '<div class="row" style="margin-top:10px"><button class="ghost" onclick="go(\'talk\')">🎙️ Vill du berätta mer?</button></div>' : '');
+      ? '<div class="row" style="margin-top:10px">' + (m===4 ? '<button onclick="go(\'sos\')">🌬️ Lugna ner mig nu</button>' : '')
+        + '<button class="ghost" onclick="go(\'talk\')">🎙️ Vill du berätta mer?</button></div>' : '');
     /* Flera tryck i rad räknas som en incheckning: ändrar hon sig inom 10 min ersätts den senaste */
     const log = store.get('moods', []), last = log[log.length-1];
     if(last && Date.now()-last.d < 10*60e3) log[log.length-1] = {d:last.d, m}; else log.push({d:Date.now(), m});
@@ -613,6 +672,7 @@ function go(id, isBack){
   if(id==='kaleido') kInit();
   if(id==='memory' && !mem.cards.length) mNew();
   if(id==='sand') sInit(); else sStop();
+  if(id==='sos') sosStart(isBack); else sosStop();
   curScreen = id; renderMusic();
   asked[id] = false;
 }
@@ -912,7 +972,8 @@ function renderTalk(a){
   const msgs = a.cats.slice(0,2).map(c=>pick(CATS[c].msgs));
   if(!msgs.length) msgs.push(pick(MESSAGES));
   msgs.forEach(m => h += `<div class="reply">💙 ${m}</div>`);
-  if(a.intense) h += `<div class="reply">Det låter som att känslan är stark just nu. Börja gärna med att andas långsamt – det hjälper kroppen att lugna sig.</div>`;
+  if(a.intense) h += `<div class="reply">Det låter som att känslan är stark just nu. Börja gärna med att andas långsamt – det hjälper kroppen att lugna sig.
+    <div class="row" style="margin-top:8px"><button onclick="go('sos')">🌬️ Lugna ner mig nu</button></div></div>`;
   h += `<b>Det här kan hjälpa nu:</b><div class="sugg">`;
   suggest(a.cats, a.intense).forEach(s => h += `<button data-ex="${s.e}">${EX[s.e]}${s.learned?'<span class="tag">brukar hjälpa dig</span>':''}</button>`);
   h += `</div><div class="row" style="margin-top:10px"><button class="ghost" id="notNow">Inte nu, tack</button></div>`;
@@ -1094,14 +1155,32 @@ function pData(){
   const since = dayStart(Date.now()) - (pDays-1)*DAY, f = a => (a||[]).filter(x => x.d >= since);
   if(isParentPhone()){
     const r = store.get('remote', null) || {};
-    return { since, moods:f(r.moods), themes:f(r.themelog), fb:f(r.fblog), stars:r.stars||[], diary:f(r.diary) };
+    return { since, moods:f(r.moods), themes:f(r.themelog), fb:f(r.fblog), stars:r.stars||[], diary:f(r.diary), sos:f(r.sos) };
   }
   return { since, moods:f(store.get('moods',[])), themes:f(store.get('themelog',[])), fb:f(store.get('fblog',[])),
-           stars:store.get('stars',[]), diary:f(store.get('diary',[])) };
+           stars:store.get('stars',[]), diary:f(store.get('diary',[])), sos:f(store.get('sos',[])) };
+}
+/* Om perioden är tom men det finns äldre (eller, med testklockan, senare) inlägg: säg det tydligt */
+function renderHint(D){
+  const src = isParentPhone() ? (store.get('remote', null) || {})
+    : {moods:store.get('moods',[]), themelog:store.get('themelog',[]), diary:store.get('diary',[]), stars:store.get('stars',[]), fblog:store.get('fblog',[]), sos:store.get('sos',[])};
+  const times = ['moods','themelog','diary','stars','fblog','sos'].flatMap(k => (src[k]||[]).map(x => x.d));
+  const empty = !D.moods.length && !D.sos.length && !D.themes.length && !D.diary.length && !D.fb.length && !D.stars.some(s => s.d >= D.since);
+  const el = $('pHint');
+  if(!empty || !times.length){ el.innerHTML = ''; return; }
+  const last = Math.max(...times), long = {weekday:'long', day:'numeric', month:'long'};
+  const future = last > Date.now();
+  el.innerHTML = `<div class="card" style="background:#fff7dc"><b>📭 Inga inlägg de senaste ${pDays} dagarna</b>
+    <p class="small" style="margin:6px 0 10px">${future
+      ? `Det finns inlägg med datum efter idag (${fmt(last, long)}). Det kan bero på testklockan.`
+      : `Det senaste inlägget är från ${fmt(last, long)}.`}</p>
+    ${!future && pDays === 7 && last >= dayStart(Date.now()) - 29*DAY ? '<div class="row"><button id="pHint30">Visa 30 dagar</button></div>' : ''}</div>`;
+  const b = $('pHint30'); if(b) b.onclick = ()=> document.querySelector('[data-p="30"]').click();
 }
 function renderParent(){
   renderTwo();
   const D = pData(), avg = a => a.reduce((s,x)=>s+x.m,0)/a.length;
+  renderHint(D);
 
   // Varningar
   const cr = D.themes.filter(x=>x.x);
@@ -1151,6 +1230,9 @@ function renderParent(){
       `<div class="hbar"><span class="lbl">${EX[e]}</span><span class="n" style="flex:1;text-align:left">👍 ${h.u} · 🤏 ${h.l} · 👎 ${h.d}</span></div>`).join('')
     : '<p class="small">Inga svar ännu.</p>';
 
+  // Lugna-knappen: hur ofta, när på dagen och om det kändes bättre efteråt
+  $('pSos').innerHTML = sosSummaryHtml(D.sos);
+
   // Stjärnor
   const st = D.stars.slice(-5).reverse();
   $('pStars').innerHTML = st.length ? st.map(s => `<li><b>${fmt(s.d)}</b> ⭐ ${escapeHtml(s.t)}</li>`).join('') : '<li>Inga stjärnor ännu.</li>';
@@ -1182,6 +1264,7 @@ $('pCopy').onclick = async ()=>{
     wk ? `Tyngsta veckodag: ${WD[wk.w]}` : '',
     `Vanligaste teman: ${Object.entries(tc).sort((p,q)=>q[1]-p[1]).map(([c,n])=>CATS[c].label+' ('+n+')').join(', ') || '–'}`,
     `Övningar som hjälpt mest: ${Object.entries(hp).sort((p,q)=>q[1]-p[1]).filter(x=>x[1]>0).map(([e])=>EX[e].replace(/^\S+\s/,'')).join(', ') || '–'}`,
+    `Lugna-knappen använd: ${D.sos.length} gång(er)` + (D.sos.length ? ` (kändes bättre efteråt: ${D.sos.filter(x=>x.f==='b').length}, fortfarande jobbigt: ${D.sos.filter(x=>x.f==='s').length})` + (sosWhen(D.sos) ? `, oftast ${sosWhen(D.sos)}` : '') : ''),
     `Modiga stjärnor under perioden: ${D.stars.filter(s=>s.d>=D.since).length}`,
     D.themes.some(x=>x.x) ? `OBS: allvarliga formuleringar förekom ${D.themes.filter(x=>x.x).length} gång(er).` : ''
   ].filter(Boolean).join('\n');
@@ -1278,12 +1361,12 @@ function buildReport(){
   const since = Date.now() - 60*DAY, f = a => a.filter(x => x.d >= since);
   return { v:1, at:Date.now(), name:store.get('name',''),
     moods:f(store.get('moods',[])), themelog:f(store.get('themelog',[])), fblog:f(store.get('fblog',[])),
-    stars:store.get('stars',[]),
+    stars:store.get('stars',[]), sos:f(store.get('sos',[])),
     diary:f(store.get('diary',[])).map(e => e.s ? {d:e.d, t:e.t, c:e.c, m:e.m, s:1} : {d:e.d, s:0}) };
 }
 
 let toastT = null;
-function toast(msg){ const t=$('toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove('on'), 3500); }
+function toast(msg, ms){ const t=$('toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove('on'), ms || 3500); }
 
 /* Barnets sida: skicka rapporten */
 async function sendReport(){
@@ -1615,6 +1698,78 @@ $('spAdd').onclick = ()=>{
 
 $('meWelcome').onclick = ()=> showWelcome('name');
 
+/* ---------- 🌬️ Lugna-knappen: andningstriangeln ----------
+   För när det känns jättejobbigt. Startar direkt, ingen tidspress. Pricken går runt en triangel:
+   andas in 4 s (uppför), håll 2 s, andas ut långsamt 6 s (längs botten). Den långa utandningen lugnar kroppen.
+   Varje användning loggas i ls_sos [{d, r: andetag, f: 'b' bättre / 's' fortfarande jobbigt / null}]. */
+const SOS_PTS = [[18,250],[150,22],[282,250],[18,250]];
+const SOS_PH = [["Andas in…",4],["Håll lite…",2],["Andas ut, långsamt…",6]];
+let sosRaf = null, sosT0 = 0, sosRounds = 0, sosIdx = -1, sosAsked = false;
+function sosStart(isBack){
+  /* Tillbaka hit inom en kvart (t.ex. från Bubblor) räknas som samma tillfälle, inte en ny användning */
+  const log = store.get('sos', []), last = log[log.length-1];
+  if(!(isBack && last && Date.now() - last.d < 15*60e3)){ log.push({d: Date.now(), r: 0, f: null}); store.set('sos', log.slice(-300)); }
+  sosIdx = store.get('sos', []).length - 1; sosRounds = 0; sosAsked = false;
+  $('sosNext').innerHTML = ''; $('sosCount').textContent = '';
+  sosT0 = performance.now(); cancelAnimationFrame(sosRaf); sosRaf = requestAnimationFrame(sosTick);
+}
+function sosStop(){ cancelAnimationFrame(sosRaf); sosRaf = null; }
+function sosSave(patch){ const log = store.get('sos', []), e = log[sosIdx]; if(!e) return;
+  if('r' in patch) patch.r = Math.max(e.r || 0, patch.r);   // tillbaka till samma tillfälle räknar inte ner
+  Object.assign(e, patch); store.set('sos', log); }
+function sosTick(now){
+  const total = 12, t = ((now - sosT0)/1000), round = Math.floor(t/total), inR = t % total;
+  let ph = 0, acc = 0; while(ph < 2 && inR >= acc + SOS_PH[ph][1]){ acc += SOS_PH[ph][1]; ph++; }
+  const k = Math.min(1, (inR - acc)/SOS_PH[ph][1]), left = Math.ceil(SOS_PH[ph][1] - (inR - acc));
+  const [a, b] = [SOS_PTS[ph], SOS_PTS[ph+1]];
+  /* Med reducerad rörelse står pricken i hörnet och sidan lyser i stället */
+  const kk = RM ? 0 : k, dot = $('sosDot');
+  dot.setAttribute('cx', a[0] + (b[0]-a[0])*kk); dot.setAttribute('cy', a[1] + (b[1]-a[1])*kk);
+  [0,1,2].forEach(i => $('sosL'+i).setAttribute('stroke', i === ph ? '#bfe6ff' : '#ffffff40'));
+  $('sosPhase').textContent = SOS_PH[ph][0] + ' ' + left;
+  if(round !== sosRounds){ sosRounds = round; $('sosCount').textContent = round + (round === 1 ? ' andetag' : ' andetag');
+    sosSave({r: round}); if(round === 5 && !sosAsked){ sosAsked = true; sosAsk(); } }
+  sosRaf = requestAnimationFrame(sosTick);
+}
+function sosAsk(){
+  $('sosNext').innerHTML = `<div class="card" style="text-align:center"><b>Hur känns det nu?</b>
+    <div class="row" style="margin-top:10px"><button id="sosBetter">🙂 Lite bättre</button><button class="ghost" id="sosSame">😣 Fortfarande jättejobbigt</button></div>
+    <p class="small" style="margin:8px 0 0">Du kan fortsätta andas med triangeln så länge du vill.</p></div>`;
+  $('sosBetter').onclick = ()=>{ sosSave({f:'b'});
+    $('sosNext').innerHTML = `<div class="card" style="text-align:center"><b>Bra jobbat. Du klarade det. 💙</b>
+      <p style="margin:8px 0">Kroppen behöver lite tid att landa. Vill du göra något lugnt en stund?</p>
+      <div class="row"><button class="ghost" onclick="go('bubbles')">🎈 Bubblor</button><button class="ghost" onclick="go('music')">🎵 Lugn musik</button><button class="ghost" onclick="go('ground')">🌿 5-4-3-2-1</button></div></div>`; };
+  $('sosSame').onclick = ()=>{ sosSave({f:'s'});
+    $('sosNext').innerHTML = `<div class="card"><b>Det är okej. Vi tar nästa steg. 💙</b>
+      <div class="steplist" style="margin-top:10px">
+        <div>💧 <b>Kallt vatten.</b> Spola kallt vatten över händerna och handlederna en stund, eller håll något kallt. Kylan hjälper kroppen att varva ner snabbt.</div>
+        <div>🦶 <b>Fötterna i golvet.</b> Tryck fötterna hårt mot golvet. Titta dig omkring och säg tyst fem saker du ser.</div>
+        <div>🙋 <b>Säg till en vuxen.</b> Du kan säga: ”Jag har det jobbigt just nu. Kan du vara med mig en stund?”</div>
+      </div>
+      <p class="small" style="margin:10px 0 6px">Känslan är stark nu, men den blir mindre igen. Fortsätt andas med triangeln medan du gör det här.</p></div>`; };
+}
+$('sosStop').onclick = ()=> goBack();
+
+/* Föräldravyn: sammanfattning av Lugna-knappen */
+function sosWhen(list){
+  if(list.length < 3) return '';
+  const B = [["på morgonen",5,10],["under skoldagen",10,15],["på eftermiddagen och kvällen",15,21],["på kvällen och natten",21,29]], n = [0,0,0,0];
+  list.forEach(x => { let h = new Date(x.d).getHours(); if(h < 5) h += 24; B.forEach((b,i) => { if(h >= b[1] && h < b[2]) n[i]++; }); });
+  const max = Math.max(...n), i = n.indexOf(max);
+  return max >= 2 && max/list.length >= 0.5 ? B[i][0] : '';
+}
+function sosSummaryHtml(list){
+  if(!list.length) return '<p class="small">Inte använd under perioden.</p>';
+  const better = list.filter(x => x.f === 'b').length, same = list.filter(x => x.f === 's').length, when = sosWhen(list);
+  const F = {b:'🙂 lite bättre efteråt', s:'😣 fortfarande jobbigt'};
+  return `<div class="kpis" style="margin:8px 0"><div><b>${list.length}</b><small>gånger</small></div>
+      <div><b>${better}</b><small>bättre efteråt</small></div><div><b>${same}</b><small>fortfarande jobbigt</small></div></div>
+    ${when ? `<p class="small">Oftast ${when}.</p>` : ''}
+    <ul class="list">${list.slice().reverse().slice(0,10).map(x => `<li><b>${fmt(x.d,{weekday:'short',day:'numeric',month:'short'})} kl. ${new Date(x.d).toLocaleTimeString('sv-SE',{hour:'2-digit',minute:'2-digit'})}</b>
+      · ${x.r || 0} andetag${x.f ? ' · ' + F[x.f] : ''}</li>`).join('')}</ul>
+    ${same ? '<p class="small">Om det ofta fortfarande känns jobbigt efteråt kan det vara bra att ta upp med BUP eller elevhälsan.</p>' : ''}`;
+}
+
 /* ---------- Namn ---------- */
 document.getElementById('saveName').onclick=()=>{ store.set('name', document.getElementById('nameIn').value.trim()); greet(); go('home'); };
 
@@ -1646,7 +1801,7 @@ function showWelcome(step){
       <p class="small">Det finns inga fel svar och ingen brådska.</p>
       <div class="row"><button id="wNext">Nästa</button></div>`,
     mine: `<div class="wic">🔒</div><h3>Det här är ditt</h3>
-      <div class="steps">Din förälder kan se hur ditt humör har varit, vad du har berättat om (till exempel skolan) och vad som hjälper dig.<br><br><b>Din dagbok är din.</b> Din förälder kan bara läsa det du själv väljer att dela. Det du skriver i Oromolnet sparas aldrig.</div>
+      <div class="steps">Din förälder kan se hur ditt humör har varit, vad du har berättat om (till exempel skolan), vad som hjälper dig och hur ofta du använder 🌬️ Lugna-knappen.<br><br><b>Din dagbok är din.</b> Din förälder kan bara läsa det du själv väljer att dela. Det du skriver i Oromolnet sparas aldrig.</div>
       <p class="small">Det du berättar om oro syns bara som ett ämne, till exempel skolan. Bara om något låter riktigt allvarligt får din förälder veta att du har haft en tung dag, men inte vad du skrev.</p>
       <div class="row"><button id="wNext">Då kör vi 💙</button></div>`
   };
@@ -1685,26 +1840,41 @@ function demoData(){
   const diary = T.map(([t,c,s],i) => ({d: now - (26 - i*5)*DAY, t, c, m: pick([1,2,3]), s}));
   const stars = ["Jag åt lunch i matsalen","Jag gick på kalaset","Jag pratade inför klassen","Jag åkte buss själv","Jag sa till en vuxen när magen kändes konstig"]
     .map((t,i) => ({t, d: now - (24 - i*5)*DAY}));
-  return {moods, themelog, fblog, w, diary, stars};
+  const sos = [27,22,15,14,8,6,1].map((n,i) => ({d: dayStart(now) - n*DAY + (i%3 ? 7.3 : 20.5)*3600e3, r: 5 + (i%2)*5, f: ['b','b','s','b',null,'b','s'][i]}));
+  return {moods, themelog, fblog, w, diary, stars, sos};
 }
 function testTool(t){
   const info = $('testInfo');
-  if(t === 'demo'){ const D = demoData(); ['moods','themelog','fblog','w','diary','stars'].forEach(k => store.set(k, D[k]));
-    if(!store.get('name','')) store.set('name','Testbarn');
-    greet(); renderInsight(); info.textContent = 'Klart! Öppna föräldravyn för att se statistiken.'; }
-  if(t === 'alert'){ const tl = store.get('themelog',[]); tl.push({d: Date.now() - 2*DAY, c:[], x:1}); store.set('themelog', tl);
-    info.textContent = 'En varning har lagts till för två dagar sedan. Öppna föräldravyn.'; }
-  if(t === 'week'){ if(!store.get('paircode',null)){ info.textContent = 'Koppla ihop med en kod först (🙂 Jag → Dela med min förälder).'; return; }
-    store.set('lastsent', Date.now() - 8*DAY); store.set('nudgeNo', 0); go('home'); closeTest(); toast('Påminnelsen visas nu på startsidan.'); return; }
-  if(t === 'report'){
-    if(!isParentPhone()){ info.textContent = 'Gör först den här telefonen till föräldratelefon: välj "Jag är förälder → Min egen telefon", eller "Gör den här till föräldratelefon" i föräldravyn.'; return; }
-    const D = demoData(), rep = {v:1, at:Date.now(), name:'Testbarn', moods:D.moods, themelog:D.themelog, fblog:D.fblog, stars:D.stars,
+  /* Stäng verktygen, visa en tydlig bekräftelse och öppna föräldravyn (via PIN) så att resultatet syns direkt */
+  const done = (msg, showParent) => { closeTest(); toast(parentOpen ? msg.replace(/ Skriv din PIN.*$/, '') : msg, 6000);
+    if(showParent){ if(parentOpen) renderParent(); else setTimeout(()=> openPin(), 600); } };
+  /* På en föräldratelefon visar föräldravyn bara inlästa rapporter, så exempeldatan läses in som en rapport */
+  const asReport = (D, msg) => {
+    const rep = {v:1, at:Date.now(), name: store.get('name','') || 'Testbarn', moods:D.moods, themelog:D.themelog, fblog:D.fblog, stars:D.stars, sos:D.sos,
       diary: D.diary.map(e => e.s ? {d:e.d, t:e.t, c:e.c, m:e.m, s:1} : {d:e.d, s:0})};
-    const code = store.get('paircode', null);
-    sealReport(code, rep).then(txt => openReport(code, txt)).then(r => { store.set('remote', r);
-      info.textContent = 'Exempelrapporten är krypterad, avkrypterad och inläst. Öppna föräldravyn.'; })
+    const code = store.get('paircode', null) || newPairCode(); store.set('paircode', code);
+    sealReport(code, rep).then(txt => openReport(code, txt)).then(r => { store.set('remote', r); done(msg, true); })
       .catch(() => { info.textContent = 'Det gick inte att skapa rapporten.'; });
+  };
+  if(t === 'demo' || t === 'report'){
+    const D = demoData();
+    if(isParentPhone()){ asReport(D, '📊 Exempeldata för 30 dagar är inläst som en rapport. Skriv din PIN för att se föräldravyn.'); return; }
+    if(t === 'report'){ info.textContent = 'Gör först den här telefonen till föräldratelefon: välj "Jag är förälder → Min egen telefon", eller "Gör den här till föräldratelefon" i föräldravyn.'; return; }
+    ['moods','themelog','fblog','w','diary','stars','sos'].forEach(k => store.set(k, D[k]));
+    if(!store.get('name','')) store.set('name','Testbarn');
+    greet(); renderInsight(); renderDiary(); if(!parentOpen) go('home');
+    done(parentOpen ? '📊 Exempeldata för 30 dagar är tillagd.' : '📊 Exempeldata för 30 dagar är tillagd: humör, teman, dagbok och stjärnor. Skriv din PIN för att se föräldravyn.', true); return;
   }
+  if(t === 'alert'){
+    const x = {d: Date.now() - 2*DAY, c:[], x:1};
+    if(isParentPhone()){ const r = store.get('remote', null);
+      if(!r){ info.textContent = 'Läs först in en rapport, till exempel med "Fyll med exempeldata".'; return; }
+      r.themelog = (r.themelog||[]).concat([x]); store.set('remote', r); }
+    else { const tl = store.get('themelog',[]); tl.push(x); store.set('themelog', tl); }
+    done('⚠️ En varning är tillagd för två dagar sedan. Skriv din PIN för att se den i föräldravyn.', true); return;
+  }
+  if(t === 'week'){ if(!store.get('paircode',null) || isParentPhone()){ info.textContent = 'Det här gäller barnets telefon. Koppla ihop med en kod först (🙂 Jag → Dela med min förälder).'; return; }
+    store.set('lastsent', Date.now() - 8*DAY); store.set('nudgeNo', 0); go('home'); done('📅 Påminnelsen visas nu på startsidan.'); return; }
   if(t === 'fresh' || t === 'wipe'){
     if(!confirm(t === 'fresh' ? 'Rensa testdata och börja om från första starten?' : 'Rensa all testdata?')) return;
     try{ Object.keys(localStorage).filter(k => k.startsWith('ls_test_')).forEach(k => localStorage.removeItem(k)); }catch(e){}
@@ -1717,6 +1887,15 @@ if(IS_TEST){
   $('testChip').onclick = ()=>{ $('testInfo').textContent = ''; $('testBg').classList.add('on'); };
   $('testClose').onclick = closeTest;
   document.querySelectorAll('[data-t]').forEach(b => b.onclick = ()=> testTool(b.dataset.t));
+  /* Testklockan: visa vilken dag appen låtsas att det är, och byt dag (sidan laddas om) */
+  const today = fmt(Date.now(), {weekday:'long', day:'numeric', month:'long'});
+  $('clockTxt').textContent = DAYSHIFT
+    ? `Appen låtsas att det är ${today} (${DAYSHIFT > 0 ? '+' : ''}${DAYSHIFT} ${Math.abs(DAYSHIFT) === 1 ? 'dag' : 'dagar'}). Allt du gör nu får det datumet.`
+    : `Appen visar den riktiga dagen, ${today}. Byt dag för att lägga inlägg på andra datum.`;
+  if(DAYSHIFT) $('testChip').textContent = `🧪 TEST · 📅 ${fmt(Date.now())}`;
+  document.querySelectorAll('[data-shift]').forEach(b => b.onclick = ()=>{
+    const s = +b.dataset.shift; store.set('dayshift', s === 0 ? 0 : DAYSHIFT + s); location.reload();
+  });
 }
 
 greet(); showMsg(msgIndex); renderInsight(); renderNudge();
