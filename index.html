@@ -472,6 +472,16 @@
     <h3 style="text-align:center">🧪 Testverktyg</h3>
     <p class="small" style="text-align:center;margin:0">Det här är testversionen. Allt sparas separat från den riktiga appen, även på samma telefon.</p>
     <div class="tools">
+      <div style="background:#fff7dc;border-radius:14px;padding:12px 14px">
+        <b>📅 Testklocka</b>
+        <p class="small" style="margin:4px 0 8px" id="clockTxt"></p>
+        <div class="row" style="justify-content:flex-start;gap:6px">
+          <button class="ghost" data-shift="-7" style="padding:8px 12px">−7 dagar</button>
+          <button class="ghost" data-shift="-1" style="padding:8px 12px">−1 dag</button>
+          <button class="ghost" data-shift="1" style="padding:8px 12px">+1 dag</button>
+          <button class="ghost" data-shift="0" style="padding:8px 12px">Idag</button>
+        </div>
+      </div>
       <button class="ghost" data-t="demo">📊 Fyll med exempeldata (30 dagar)</button>
       <button class="ghost" data-t="alert">⚠️ Lägg till en varning, för att se hur den ser ut</button>
       <button class="ghost" data-t="week">📅 Låtsas att en vecka gått sedan rapporten skickades</button>
@@ -507,6 +517,17 @@ const store = {
   get(k, d){ try{ const v = localStorage.getItem(PFX+k); return v===null ? d : JSON.parse(v);}catch(e){return d;} },
   set(k, v){ try{ localStorage.setItem(PFX+k, JSON.stringify(v)); }catch(e){} }
 };
+
+/* Testklocka (bara i testversionen): låtsas att det är en annan dag, så att egna inlägg
+   hamnar på olika datum och mönster syns i föräldravyn. Påverkar allt som använder Date. */
+const DAYSHIFT = IS_TEST ? (+store.get('dayshift', 0) || 0) : 0;
+if(DAYSHIFT){
+  const RealDate = Date, shift = DAYSHIFT * 864e5;
+  window.Date = class extends RealDate {
+    constructor(...a){ if(a.length) super(...a); else super(RealDate.now() + shift); }
+    static now(){ return RealDate.now() + shift; }
+  };
+}
 
 /* ---------- Meddelanden ---------- */
 const MESSAGES = [
@@ -1717,6 +1738,15 @@ if(IS_TEST){
   $('testChip').onclick = ()=>{ $('testInfo').textContent = ''; $('testBg').classList.add('on'); };
   $('testClose').onclick = closeTest;
   document.querySelectorAll('[data-t]').forEach(b => b.onclick = ()=> testTool(b.dataset.t));
+  /* Testklockan: visa vilken dag appen låtsas att det är, och byt dag (sidan laddas om) */
+  const today = fmt(Date.now(), {weekday:'long', day:'numeric', month:'long'});
+  $('clockTxt').textContent = DAYSHIFT
+    ? `Appen låtsas att det är ${today} (${DAYSHIFT > 0 ? '+' : ''}${DAYSHIFT} ${Math.abs(DAYSHIFT) === 1 ? 'dag' : 'dagar'}). Allt du gör nu får det datumet.`
+    : `Appen visar den riktiga dagen, ${today}. Byt dag för att lägga inlägg på andra datum.`;
+  if(DAYSHIFT) $('testChip').textContent = `🧪 TEST · 📅 ${fmt(Date.now())}`;
+  document.querySelectorAll('[data-shift]').forEach(b => b.onclick = ()=>{
+    const s = +b.dataset.shift; store.set('dayshift', s === 0 ? 0 : DAYSHIFT + s); location.reload();
+  });
 }
 
 greet(); showMsg(msgIndex); renderInsight(); renderNudge();

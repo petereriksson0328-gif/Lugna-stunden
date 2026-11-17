@@ -102,6 +102,7 @@ Testa nya saker på din egen telefon innan de når hennes:
 1. Ändringar läggs först på grenen `test`.
 2. Öppna `…/Lugna-stunden/test/` på din telefon. Testversionen känns igen på den gula knappen **🧪 TEST · verktyg**. Den kan läggas till på hemskärmen och heter då "LS TEST".
 3. Testa. Under **🧪 TEST · verktyg** finns:
+   - **📅 Testklocka**: låtsas att det är en annan dag (−7, −1, +1 dag eller tillbaka till idag). Allt du gör får då det datumet, så du kan bygga upp egna mönster över flera dagar. Märkningen visar vilken dag appen låtsas att det är.
    - **Fyll med exempeldata (30 dagar)**, så att föräldravyn har något att visa
    - **Lägg till en varning**, för att se hur varningsrutan ser ut
    - **Låtsas att en vecka gått**, för att se påminnelsen om att skicka
