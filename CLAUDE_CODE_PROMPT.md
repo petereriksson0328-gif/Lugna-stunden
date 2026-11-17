@@ -18,7 +18,7 @@ Appen ska göra vardagen lite lättare. Den ersätter inte vård (BUP eller tera
 ## Teknik (krav)
 - Ren HTML, CSS och JavaScript. **Inget ramverk, inget byggsteg.** All appkod ligger i `index.html`.
 - Hostas på **GitHub Pages**. Använd bara relativa sökvägar (`./`), eftersom appen ligger under `/<repo>/`.
-- **Ingen backend och ingen extern AI-tjänst.** Ingen data om henne får lämna telefonen. All analys sker lokalt.
+- **Ingen backend och ingen extern AI-tjänst.** All analys sker lokalt. Data lämnar bara telefonen när hon själv skickar en krypterad rapport till förälderns telefon (se Två telefoner).
 - Data sparas i `localStorage` via ett `store`-objekt med try/catch. Alla nycklar har prefixet `ls_`.
 - PWA:
   - `manifest.json` med `start_url` och `scope` satta till `./`
@@ -69,6 +69,13 @@ tests/analys.test.js   test av textanalysen (node tests/analys.test.js)
    - efter "Nej" frågar appen igen om 3 dagar
 10. **Om mig:** namn, kort info om oro och BRIS, och rutan "Vad ser min förälder?" som öppet beskriver vad föräldravyn visar.
 
+### Två telefoner (utan server)
+- Förälderns telefon: välkomst → Jag är förälder → PIN → **Min egen telefon** (`role` = `parent`). Appen visar en kopplingskod (16 tecken, 2 sista är kontrollsumma) och frågar efter PIN vid varje start.
+- Barnets telefon: koden skrivs in under Om mig → Dela med min förälder (eller i föräldravyn på barnets telefon).
+- "Skicka till min förälder" skapar en rapport (`LS1.` + base64url av IV + AES-GCM, nyckel via PBKDF2 av koden) och öppnar dela-menyn. Påminnelse på startsidan efter 7 dagar ("Inte nu" skjuter upp 2 dagar). Krisrutan har knappen "Skicka till min förälder nu".
+- Rapporten innehåller senaste 60 dagarna: moods, themelog, fblog, stars, delade dagboksinlägg med text, privata bara som datum.
+- Förälderns telefon läser in rapporten (urklipp eller inklistring). Föräldravyn visar då data från `remote`.
+
 ### Dold föräldravy
 - Öppnas med **5 snabba tryck på hälsningen**, eller knappen "För föräldrar" under Om mig, och PIN-kod (4–6 siffror, SHA-256 med slumpat salt per enhet i `pinsalt`).
 - Låses automatiskt vid `visibilitychange`. `#nollstall-pin` i adressen nollställer PIN-koden.
@@ -84,7 +91,7 @@ tests/analys.test.js   test av textanalysen (node tests/analys.test.js)
 - "Kopiera sammanfattning": en text **utan dagbokstexter** som kan delas med BUP eller en terapeut.
 
 ### localStorage-nycklar (prefix `ls_`)
-`name`, `moods` [{d,m}], `diary` [{d,t,c,m,s}] (s=1 om delad med föräldern), `themelog` [{d,c,x}], `fblog` [{d,e,v}], `w` (inlärningspoäng {tema:{övning:poäng}}, inkl. `allt`), `ctx` (senaste teman), `stars` [{t,d}], `pin` (hash), `pinsalt`, `installNo`, `setup` (1 när välkomsten är klar)
+`name`, `moods` [{d,m}], `diary` [{d,t,c,m,s}] (s=1 om delad med föräldern), `themelog` [{d,c,x}], `fblog` [{d,e,v}], `w` (inlärningspoäng {tema:{övning:poäng}}, inkl. `allt`), `ctx` (senaste teman), `stars` [{t,d}], `pin` (hash), `pinsalt`, `installNo`, `setup` (1 när välkomsten är klar), `role` (`parent` på förälderns telefon), `paircode`, `pairedat`, `lastsent`, `nudgeNo`, `remote` (senast inlästa rapporten)
 
 ## Uppgift nu
 1. Läs igenom mitt repository och jämför det med specifikationen ovan.
