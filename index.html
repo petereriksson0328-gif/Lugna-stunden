@@ -389,6 +389,7 @@
     <div class="card" id="pTwo"></div>
     <div class="seg"><button data-p="7">7 dagar</button><button data-p="30" class="ghost">30 dagar</button></div>
     <div id="pAlert"></div>
+    <div id="pHint"></div>
     <div class="card"><div class="kpis" id="pKpis"></div></div>
     <div class="card"><b>Humör per dag</b><p class="small" style="margin:2px 0">Högre stapel = bättre dag. Grått = ingen incheckning.</p>
       <div class="bars" id="pBars"></div><div class="blabels" id="pBl"></div></div>
@@ -1120,9 +1121,27 @@ function pData(){
   return { since, moods:f(store.get('moods',[])), themes:f(store.get('themelog',[])), fb:f(store.get('fblog',[])),
            stars:store.get('stars',[]), diary:f(store.get('diary',[])) };
 }
+/* Om perioden är tom men det finns äldre (eller, med testklockan, senare) inlägg: säg det tydligt */
+function renderHint(D){
+  const src = isParentPhone() ? (store.get('remote', null) || {})
+    : {moods:store.get('moods',[]), themelog:store.get('themelog',[]), diary:store.get('diary',[]), stars:store.get('stars',[]), fblog:store.get('fblog',[])};
+  const times = ['moods','themelog','diary','stars','fblog'].flatMap(k => (src[k]||[]).map(x => x.d));
+  const empty = !D.moods.length && !D.themes.length && !D.diary.length && !D.fb.length && !D.stars.some(s => s.d >= D.since);
+  const el = $('pHint');
+  if(!empty || !times.length){ el.innerHTML = ''; return; }
+  const last = Math.max(...times), long = {weekday:'long', day:'numeric', month:'long'};
+  const future = last > Date.now();
+  el.innerHTML = `<div class="card" style="background:#fff7dc"><b>📭 Inga inlägg de senaste ${pDays} dagarna</b>
+    <p class="small" style="margin:6px 0 10px">${future
+      ? `Det finns inlägg med datum efter idag (${fmt(last, long)}). Det kan bero på testklockan.`
+      : `Det senaste inlägget är från ${fmt(last, long)}.`}</p>
+    ${!future && pDays === 7 && last >= dayStart(Date.now()) - 29*DAY ? '<div class="row"><button id="pHint30">Visa 30 dagar</button></div>' : ''}</div>`;
+  const b = $('pHint30'); if(b) b.onclick = ()=> document.querySelector('[data-p="30"]').click();
+}
 function renderParent(){
   renderTwo();
   const D = pData(), avg = a => a.reduce((s,x)=>s+x.m,0)/a.length;
+  renderHint(D);
 
   // Varningar
   const cr = D.themes.filter(x=>x.x);
