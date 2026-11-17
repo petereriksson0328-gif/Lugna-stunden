@@ -92,7 +92,7 @@ Det hon skriver är hennes. Om hon tror att allt läses, slutar hon troligen skr
 ```
 node tests/analys.test.js
 ```
-Testar att temana känns igen rätt (till exempel att "prova" inte räknas som prov) och att trygghetsspärren reagerar på allvarliga formuleringar. Lägg gärna till egna meningar i testet.
+Testar att temana känns igen rätt (till exempel att "prova" inte räknas som prov), att trygghetsspärren reagerar på allvarliga formuleringar och att vanlig oro och vardagsuttryck ("jag trodde jag skulle dö", "mamma kommer döda mig") **inte** ger en varning. Lägg gärna till egna meningar i testet.
 
 ## Anpassa
 Meddelandena ligger i listan `MESSAGES` i `index.html`. Där kan du lägga till egna, till exempel insidesskämt eller saker hon tycker om.

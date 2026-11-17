@@ -324,7 +324,7 @@
       <p>Din förälder kan se hur ditt humör har varit, vilka saker du har berättat om (till exempel skolan eller magen), vilka övningar som hjälper dig och dina modiga stjärnor.</p>
       <p><b>Din dagbok är din.</b> Din förälder kan bara läsa inlägg som du själv har valt att dela. Det du skriver i Oromolnet sparas aldrig.</p>
       <p>Om din förälder har appen på sin egen telefon skickas ingenting dit förrän <b>du</b> trycker på Skicka.</p>
-      <p class="small">Om du skriver att du inte vill leva eller vill skada dig, får din förälder veta att du har haft det väldigt tungt den dagen, men inte vad du skrev. Det är för att du inte ska vara ensam med något så tungt.</p>
+      <p class="small">Det du skriver om oro, till exempel om skolan eller magen, syns bara som ett ämne. Bara om något låter riktigt allvarligt får din förälder veta att du har haft en tung dag, men inte vad du skrev. Det är för att du inte ska behöva vara ensam med det.</p>
     </div>
     <div class="card" id="shareCard">
       <b>📤 Dela med min förälder</b>
@@ -690,9 +690,12 @@ const CATS = {
     ]}
 };
 /* Allvarliga formuleringar. Hellre en varning för mycket än en för lite. */
+/* Bara uttryck för vilja eller avsikt. Vanlig oro och vardagsuttryck som ”jag trodde jag skulle dö”,
+   ”mamma kommer döda mig” eller ”provet tar livet av mig” ska inte ge en varning – se tests/analys.test.js. */
 const CRISIS = ["vill dö","vill bara dö","vill inte leva","inte vill leva","orkar inte leva","inte orkar leva",
-  "ta livet","tar livet","självmord","vill inte finnas","inte vill finnas","vill försvinna för alltid",
-  "skada mig","skadar mig","skadat mig","skära mig","skär mig","skurit mig","döda mig","dödar mig",
+  "vill ta livet av mig","ska ta livet av mig","tänker ta livet av mig","självmord",
+  "vill inte finnas","inte vill finnas","vill försvinna för alltid",
+  "vill skada mig","skada mig själv","skadar mig själv","jag skär mig","vill skära mig","skurit mig","vill döda mig",
   "ingen mening att leva","bättre om jag inte fanns"];
 const INTENSE = ["jätte","panik","skräck","livrädd","mycket rädd","gråter","gråta","hjärtat slår","skakar"];
 /* Ord som börjar som en ordstam men betyder något annat (”prova” är inte ”prov”, ”sjukt kul” är inte sjuk) */
@@ -952,8 +955,9 @@ function renderParent(){
   // Varningar
   const cr = D.themes.filter(x=>x.x);
   $('pAlert').innerHTML = cr.length ? `<div class="card alert"><b>⚠️ Viktigt att veta</b>
-    <p>${cap([...new Set(cr.map(x=>fmt(x.d,{weekday:'long',day:'numeric',month:'long'})))].join(', '))} skrev hon något som lät som allvarlig nöd
-    (t.ex. att inte vilja leva eller att skada sig). Appen visade henne BRIS och 112.</p>
+    <p>${cap([...new Set(cr.map(x=>fmt(x.d,{weekday:'long',day:'numeric',month:'long'})))].join(', '))} skrev hon något som lät väldigt allvarligt.
+    Appen bad henne då gå till en vuxen och visade BRIS och 112.</p>
+    <p class="small">Vanlig oro och vardagsuttryck ger ingen varning. Den här rutan visas bara vid formuleringar som kan tyda på att hon mår mycket dåligt.</p>
     <p>Prata lugnt med henne, och kontakta gärna BUP, elevhälsan eller vårdcentralen. Vid akut oro: ring <b>112</b>.
     Stöd för dig som förälder: <b>1177</b>.</p></div>` : '';
 
@@ -1292,7 +1296,7 @@ function showWelcome(step){
       <div class="row"><button id="wNext">Nästa</button></div>`,
     mine: `<div class="wic">🔒</div><h3>Det här är ditt</h3>
       <div class="steps">Din förälder kan se hur ditt humör har varit, vad du har berättat om (till exempel skolan) och vad som hjälper dig.<br><br><b>Din dagbok är din.</b> Din förälder kan bara läsa det du själv väljer att dela. Det du skriver i Oromolnet sparas aldrig.</div>
-      <p class="small">Om du skriver något som låter som att du inte vill leva eller vill skada dig, får din förälder veta att du har haft det tungt den dagen, men inte vad du skrev.</p>
+      <p class="small">Det du berättar om oro syns bara som ett ämne, till exempel skolan. Bara om något låter riktigt allvarligt får din förälder veta att du har haft en tung dag, men inte vad du skrev.</p>
       <div class="row"><button id="wNext">Då kör vi 💙</button></div>`
   };
   wBox.innerHTML = V[step] + dots; wBg.classList.add('on');
