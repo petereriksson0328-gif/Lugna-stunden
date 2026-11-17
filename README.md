@@ -7,7 +7,7 @@ Första gången appen öppnas får man välja **🙂 Jag är barnet** eller **�
 - **Förälder:** välj en PIN-kod (4–6 siffror) och skriv gärna barnets namn. Lämna sedan över telefonen.
 - **Barn:** en kort välkomst i tre steg: namn, hur appen fungerar och *Det här är ditt* (vad föräldern kan se).
 
-Installationsfrågan visas först när välkomsten är klar. Den som redan har använt appen slipper välkomsten.
+Installationsfrågan visas först när välkomsten är klar. Den som redan har använt appen slipper välkomsten. Den kan visas igen under **🙂 Jag → Visa välkomsten igen**.
 
 ## Två telefoner (barnets och förälderns)
 Appen kan användas på två telefoner utan server och utan konto.
@@ -29,6 +29,11 @@ Din telefon frågar efter PIN varje gång appen öppnas. Har du redan använt ap
 - **Andas med bollen** – andning 4 s in, 2 s håll, 6 s ut
 - **Lugna bubblor** – bubblor som flyter sakta och går att poppa, utan poäng eller tidspress (mjukt ljud om man vill)
 - **5-4-3-2-1** – en sinnesövning för att landa i nuet
+- **Lugna spel** – inga poäng, ingen tid, inget som kan gå fel:
+  - 🎨 **Kalejdoskop**: det hon ritar speglas till ett mönster
+  - 🃏 **Lugn memory**: hitta paren, utan klocka och utan räknare för försök
+  - 🏝️ **Sandträdgård**: kratta i sanden och lägg stenar; spåren jämnas sakta ut
+- **Lugn musik** – mjuka toner, regn eller vågor som skapas i appen (fungerar utan internet), med volym och "stäng av efter". Musiken fortsätter medan hon gör annat i appen. Dessutom länkar till Spotify, och hon kan lägga till egna Spotify-listor. (Spotify kräver att man är 13 år, eller ett familjekonto.)
 - **Oromolnet** – skriv en orolig tanke och låt den flyga iväg (sparas inte)
 - **Modiga stjärnor** – samla stjärnor för saker man vågat göra
 
