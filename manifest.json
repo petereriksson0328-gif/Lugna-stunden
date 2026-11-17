@@ -1,0 +1,17 @@
+{
+  "name": "Lugna Stunden",
+  "short_name": "Lugna Stunden",
+  "description": "Lugnande meddelanden och små övningar för en tryggare dag.",
+  "lang": "sv",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#e8f4f8",
+  "theme_color": "#cfe8f3",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
