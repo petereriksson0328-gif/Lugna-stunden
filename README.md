@@ -33,6 +33,7 @@ Din telefon har ingen barndel. Den visar en låsskärm och frågar efter PIN var
 - **Lugna spel** – inga poäng, ingen tid, inget som kan gå fel:
   - 🎨 **Kalejdoskop**: det hon ritar speglas till ett mönster
   - 🃏 **Lugn memory**: hitta paren, utan klocka och utan räknare för försök
+  - 🥟 **Mjuka dumplingen**: en mjuk leksak att dra i och mosa. Den studsar tillbaka och blundar nöjt när man klämmer. Den kan bytas mot ett ☁️ moln om mat känns obehagligt. Ljudet är valfritt.
   - 🏝️ **Sandträdgård**: kratta i sanden och lägg stenar; spåren jämnas sakta ut
 - **Lugn musik** – mjuka toner, regn eller vågor som skapas i appen (fungerar utan internet), med volym och "stäng av efter". Musiken fortsätter medan hon gör annat i appen. Dessutom länkar till Spotify, och hon kan lägga till egna Spotify-listor. (Spotify kräver att man är 13 år, eller ett familjekonto.)
 - **Oromolnet** – skriv en orolig tanke och låt den flyga iväg (sparas inte)

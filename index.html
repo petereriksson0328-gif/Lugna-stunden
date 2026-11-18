@@ -234,7 +234,7 @@
       <button class="tile" data-go="bubbles"><span class="ic">🎈</span><b>Bubblor</b><small>Poppa lugnt</small></button>
       <button class="tile" data-go="ground"><span class="ic">🌿</span><b>5-4-3-2-1</b><small>Landa i nuet</small></button>
       <button class="tile" data-go="worry"><span class="ic">☁️</span><b>Oromolnet</b><small>Släpp iväg en tanke</small></button>
-      <button class="tile" data-go="games"><span class="ic">🎮</span><b>Lugna spel</b><small>Rita, para ihop, kratta</small></button>
+      <button class="tile" data-go="games"><span class="ic">🎮</span><b>Lugna spel</b><small>Rita, klämma, para ihop</small></button>
       <button class="tile" data-go="music"><span class="ic">🎵</span><b>Lugn musik</b><small>Toner, regn, vågor</small></button>
       <button class="tile" data-go="stars" style="grid-column:span 2"><span class="ic">⭐</span><b>Mina modiga stjärnor</b><small>Saker jag klarat</small></button>
     </div>
@@ -365,7 +365,8 @@
     <div class="grid">
       <button class="tile" data-go="kaleido"><span class="ic">🎨</span><b>Kalejdoskop</b><small>Rita mönster</small></button>
       <button class="tile" data-go="memory"><span class="ic">🃏</span><b>Lugn memory</b><small>Hitta paren</small></button>
-      <button class="tile" data-go="sand" style="grid-column:span 2"><span class="ic">🏝️</span><b>Sandträdgård</b><small>Kratta i sanden och lägg stenar</small></button>
+      <button class="tile" data-go="dumpling"><span class="ic">🥟</span><b>Mjuka dumplingen</b><small>Dra, klämma, mosa</small></button>
+      <button class="tile" data-go="sand"><span class="ic">🏝️</span><b>Sandträdgård</b><small>Kratta och lägg stenar</small></button>
       <button class="tile" data-go="bubbles" style="grid-column:span 2"><span class="ic">🎈</span><b>Lugna bubblor</b><small>Poppa i din egen takt</small></button>
     </div>
   </section>
@@ -395,6 +396,15 @@
     <p class="sub">Dra med fingret för att kratta i sanden. Tryck för att lägga en sten. Spåren jämnas sakta ut av sig själva.</p>
     <div class="card" style="padding:12px"><div class="cvwrap"><canvas id="scv" class="draw" aria-label="Sandträdgård"></canvas></div>
       <div class="row" style="margin-top:12px"><button class="ghost" id="sClear">Jämna ut sanden</button></div></div>
+    <div class="row"><button class="ghost" data-go="games">← Fler spel</button></div>
+  </section>
+
+  <section class="screen" id="s-dumpling">
+    <button class="ghost backbtn" data-back>← Tillbaka</button>
+    <h2 id="dTitle">🥟 Mjuka dumplingen</h2>
+    <p class="sub">Dra i kanten så töjer den sig. Tryck och håll för att mosa den. Den studsar alltid tillbaka.</p>
+    <div class="card" style="padding:12px"><div class="cvwrap"><canvas id="dcv" class="draw" aria-label="En mjuk leksak att klämma på"></canvas></div>
+      <div class="row" style="margin-top:12px"><button class="ghost" id="dSkin">☁️ Byt till moln</button><button class="ghost" id="dSound">🔈 Ljud: av</button></div></div>
     <div class="row"><button class="ghost" data-go="games">← Fler spel</button></div>
   </section>
 
@@ -686,6 +696,7 @@ function go(id, isBack){
   if(id==='memory' && !mem.cards.length) mNew();
   if(id==='sand') sInit(); else sStop();
   if(id==='sos') sosStart(isBack); else sosStop();
+  if(id==='dumpling') dStart(); else dStop();
   curScreen = id; renderMusic();
   asked[id] = false;
 }
@@ -846,7 +857,7 @@ document.getElementById('starAdd').onclick=()=>{
 
 /* ---------- Berätta: förstå, föreslå, lära ---------- */
 const EX = {breath:"🫧 Andas med bollen", bubbles:"🎈 Lugna bubblor", ground:"🌿 5-4-3-2-1", worry:"☁️ Oromolnet", stars:"⭐ Modiga stjärnor",
-  kaleido:"🎨 Kalejdoskop", memory:"🃏 Lugn memory", sand:"🏝️ Sandträdgård", music:"🎵 Lugn musik"};
+  kaleido:"🎨 Kalejdoskop", memory:"🃏 Lugn memory", sand:"🏝️ Sandträdgård", music:"🎵 Lugn musik", dumpling:"🥟 Mjuka dumplingen"};
 
 /* ANALYS-START – testas av tests/analys.test.js */
 /* Kategorier: ordstammar som känns igen, och vad som brukar passa.
@@ -1634,6 +1645,115 @@ function sSeg(a, b){
 drawable($('scv'), sSeg, p => { sStones.push({x:p.x, y:p.y, r:9+Math.random()*9, rot:Math.random()*Math.PI});
   if(sStones.length > 7) sStones.shift(); sDrawStone(sStones[sStones.length-1]); });
 $('sClear').onclick = sClear;
+
+/* Mjuka dumplingen (eller molnet): en mjuk leksak att dra i och klämma på.
+   Kroppen är en ring av punkter med fjädrar, så den töjer sig, plattas till och studsar tillbaka.
+   Ritas ren och torr – inget kladd – och kan bytas mot ett moln (ls_squishy = 'moln'). */
+const D_N = 44, dPlay = {t:0};
+let dPts = [], dRaf = null, dGrab = null, dPress = null, dSq = 0, dSqV = 0, dSqT = 0, dSnd = false, dWordT = null;
+function dSkin(){ return store.get('squishy', 'dumpling'); }
+function dRest(i, W){
+  const a = i / D_N * Math.PI * 2, R = W * 0.27, cx = W/2, cy = W*0.54, sq = dSq;
+  const sy = Math.sin(a) > 0 ? 0.72 : 1.0;                       // platt botten, rund topp
+  return { x: cx + R*1.18*Math.cos(a)*(1 + sq*0.75), y: cy + R*0.92*Math.sin(a)*sy*(1 - sq*0.62) + R*sq*0.45 };
+}
+function dStart(){
+  const cv = $('dcv'); sizeCanvas(cv);
+  const W = cv.clientWidth; if(!dPts.length || dPts.W !== W){ dPts = []; for(let i=0;i<D_N;i++){ const r = dRest(i, W); dPts.push({x:r.x, y:r.y, vx:0, vy:0}); } dPts.W = W; }
+  dPlay.t = 0; $('dTitle').textContent = dSkin() === 'moln' ? '☁️ Mjuka molnet' : '🥟 Mjuka dumplingen';
+  $('dSkin').textContent = dSkin() === 'moln' ? '🥟 Byt till dumpling' : '☁️ Byt till moln';
+  cancelAnimationFrame(dRaf); dRaf = requestAnimationFrame(dTick);
+}
+function dStop(){ cancelAnimationFrame(dRaf); dRaf = null; dGrab = null; dPress = null; }
+function dTone(f, len, vol){
+  if(!dSnd) return;
+  try{ actx = actx || new (window.AudioContext||window.webkitAudioContext)(); const o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime;
+    o.type = 'sine'; o.frequency.setValueAtTime(f, t); o.frequency.exponentialRampToValueAtTime(f*0.7, t+len);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t+0.02); g.gain.exponentialRampToValueAtTime(0.0001, t+len);
+    o.connect(g).connect(actx.destination); o.start(t); o.stop(t+len+0.05); }catch(e){}
+}
+function dWord(){
+  const el = $('dTitle'); clearTimeout(dWordT);
+  const base = dSkin() === 'moln' ? '☁️ Mjuka molnet' : '🥟 Mjuka dumplingen';
+  el.textContent = pick(["mjukt…","skönt","boing","så där","☁️","💙"]); dWordT = setTimeout(()=> el.textContent = base, 900);
+}
+function dTick(){
+  const cv = $('dcv'), W = cv.clientWidth, damp = RM ? 0.72 : 0.86;
+  /* Mosa: tryck och håll utan att dra → plattas till; släpp → studsar tillbaka */
+  if(dPress && !dPress.moved && performance.now() - dPress.t > 140) dSqT = 1;
+  dSqV += ((dSqT ? 0.6 : 0) - dSq) * 0.12; dSqV *= RM ? 0.6 : 0.78; dSq = Math.max(-0.18, Math.min(0.65, dSq + dSqV));
+  for(let i=0;i<D_N;i++){
+    const p = dPts[i], r = dRest(i, W), a = dPts[(i+D_N-1)%D_N], b = dPts[(i+1)%D_N];
+    const gw = dGrab ? (dGrab.w[i] || 0) : 0, kr = 0.07 * (1 - gw*0.85);   // det man håller i släpper vilan
+    let fx = (r.x - p.x)*kr + ((a.x+b.x)/2 - p.x)*0.25, fy = (r.y - p.y)*kr + ((a.y+b.y)/2 - p.y)*0.25;
+    if(gw){ const tx = dGrab.x + dGrab.off[i].x*(1 - gw*0.85), ty = dGrab.y + dGrab.off[i].y*(1 - gw*0.85);
+      fx += (tx - p.x)*0.3*gw; fy += (ty - p.y)*0.3*gw; }
+    if(dPress && dSqT){ const dx = p.x - dPress.x, dy = p.y - dPress.y, d = Math.hypot(dx, dy) || 1;   // fingret gör en grop
+      if(d < W*0.2){ const k = (W*0.2 - d) * 0.07; fx += dx/d*k; fy += dy/d*k; } }
+    p.vx = (p.vx + fx) * damp; p.vy = (p.vy + fy) * damp; p.x += p.vx; p.y += p.vy;
+  }
+  dDraw(cv, W); dRaf = requestAnimationFrame(dTick);
+}
+function dDraw(cv, W){
+  const x = cv.getContext('2d'), moln = dSkin() === 'moln';
+  x.clearRect(0, 0, W, W);
+  const bg = x.createLinearGradient(0, 0, 0, W); bg.addColorStop(0, moln ? '#dbeeff' : '#fdf3e7'); bg.addColorStop(1, moln ? '#ece6fb' : '#f6e9f3');
+  x.fillStyle = bg; x.fillRect(0, 0, W, W);
+  let cx = 0, cy = 0, minY = 1e9, topX = 0, maxY = -1e9, minX = 1e9, maxX = -1e9;
+  dPts.forEach(p => { cx += p.x; cy += p.y; if(p.y < minY){ minY = p.y; topX = p.x; } maxY = Math.max(maxY, p.y); minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x); });
+  cx /= D_N; cy /= D_N;
+  /* skugga */
+  x.fillStyle = '#6a7fa022'; x.beginPath(); x.ellipse(cx, maxY + 6, (maxX - minX)*0.45, 9, 0, 0, Math.PI*2); x.fill();
+  /* kroppen: mjuk kurva genom punkterna */
+  x.beginPath();
+  for(let i=0;i<=D_N;i++){ const p = dPts[i % D_N], q = dPts[(i+1) % D_N], mx = (p.x+q.x)/2, my = (p.y+q.y)/2; i ? x.quadraticCurveTo(p.x, p.y, mx, my) : x.moveTo(mx, my); }
+  x.closePath();
+  const g = x.createRadialGradient(cx - W*0.08, cy - W*0.1, W*0.03, cx, cy, W*0.4);
+  if(moln){ g.addColorStop(0, '#ffffff'); g.addColorStop(1, '#d9e6fb'); } else { g.addColorStop(0, '#fffaf2'); g.addColorStop(1, '#f1dcc2'); }
+  x.fillStyle = g; x.fill(); x.lineWidth = 3; x.strokeStyle = moln ? '#c9d8f3' : '#e6c8a4'; x.stroke();
+  /* dumplingens veck överst */
+  if(!moln){ x.strokeStyle = '#ddbb94'; x.lineWidth = 2.5; x.lineCap = 'round';
+    for(let k=-2;k<=2;k++){ x.beginPath(); x.moveTo(topX + k*W*0.035, minY + 7); x.quadraticCurveTo(topX + k*W*0.05, minY + W*0.05, topX + k*W*0.07, minY + W*0.1); x.stroke(); } }
+  /* ansikte: blundar nöjt när den mosas eller töjs */
+  const fy = cy + W*0.03, ex = W*0.075, happy = dSq > 0.12 || !!dGrab;
+  x.fillStyle = moln ? '#f9c6d8aa' : '#f6b8b8aa';
+  x.beginPath(); x.ellipse(cx - ex*1.55, fy + W*0.035, W*0.03, W*0.018, 0, 0, Math.PI*2); x.ellipse(cx + ex*1.55, fy + W*0.035, W*0.03, W*0.018, 0, 0, Math.PI*2); x.fill();
+  x.strokeStyle = '#4a3b35'; x.fillStyle = '#4a3b35'; x.lineWidth = 3; x.lineCap = 'round';
+  [-1, 1].forEach(sd => { const ox = cx + sd*ex;
+    if(happy){ x.beginPath(); x.arc(ox, fy + 3, W*0.018, Math.PI*1.1, Math.PI*1.9); x.stroke(); }
+    else { x.beginPath(); x.arc(ox, fy, W*0.014, 0, Math.PI*2); x.fill(); x.fillStyle = '#fff'; x.beginPath(); x.arc(ox - 2, fy - 2, W*0.004, 0, Math.PI*2); x.fill(); x.fillStyle = '#4a3b35'; } });
+  x.beginPath(); x.arc(cx, fy + W*0.025, W*0.02, Math.PI*0.15, Math.PI*0.85); x.stroke();
+}
+(function(){
+  const cv = $('dcv'), pt = e => { const r = cv.getBoundingClientRect(); return {x:e.clientX - r.left, y:e.clientY - r.top}; };
+  cv.addEventListener('pointerdown', e => {
+    try{ cv.setPointerCapture(e.pointerId); }catch(_){}
+    const p = pt(e), W = cv.clientWidth; dPress = {x:p.x, y:p.y, t:performance.now(), moved:false};
+    /* ta tag i kanten: punkterna nära fingret följer med, mer ju närmare */
+    const w = [], off = [];
+    dPts.forEach((q, i) => { const d = Math.hypot(q.x - p.x, q.y - p.y), lim = W*0.22; w[i] = d < lim ? 1 - d/lim : 0; off[i] = {x:q.x - p.x, y:q.y - p.y}; });
+    dGrab = w.some(v => v > 0) ? {x:p.x, y:p.y, w, off} : null;
+    playedAWhile(dPlay, 'dumpling');
+  });
+  cv.addEventListener('pointermove', e => {
+    if(!dPress) return; const p = pt(e), W = cv.clientWidth;
+    if(Math.hypot(p.x - dPress.x, p.y - dPress.y) > 10) dPress.moved = true;
+    if(dGrab && dPress.moved){ const cx = W/2, cy = W*0.54, dx = p.x - cx, dy = p.y - cy, d = Math.hypot(dx, dy), max = W*0.5;
+      dGrab.x = d > max ? cx + dx/d*max : p.x; dGrab.y = d > max ? cy + dy/d*max : p.y; }
+  });
+  const up = () => {
+    if(!dPress) return;
+    const quick = !dPress.moved && performance.now() - dPress.t < 140;
+    if(quick){ dSqV += 0.12; dTone(300, 0.25, 0.08); }                    // snabbt tryck: liten boing
+    else if(dSqT){ dTone(170, 0.5, 0.1); try{ navigator.vibrate && navigator.vibrate(12); }catch(_){} }
+    else if(dGrab){ dTone(240, 0.35, 0.08); }
+    if(!quick) dWord();
+    dPress = null; dGrab = null; dSqT = 0;
+  };
+  cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+  $('dSkin').onclick = ()=>{ store.set('squishy', dSkin() === 'moln' ? 'dumpling' : 'moln'); dStart(); };
+  $('dSound').onclick = function(){ dSnd = !dSnd; this.textContent = dSnd ? '🔊 Ljud: på' : '🔈 Ljud: av'; if(dSnd) dTone(280, 0.25, 0.08); };
+})();
 
 /* ---------- Lugn musik ----------
    Ljuden skapas i appen med Web Audio (fungerar utan internet): mjuka toner i pentatonisk skala, regn och vågor. */
