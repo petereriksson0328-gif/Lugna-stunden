@@ -1,7 +1,7 @@
 /* Lugna Stunden – service worker
    Gör att appen kan installeras och fungerar utan internet.
    Höj VERSION när du ändrar något, så hämtas nya filer. */
-const VERSION = 'lugna-v13';
+const VERSION = 'lugna-v14';
 
 /* Den riktiga appen (…/Lugna-stunden/) och testversionen (…/Lugna-stunden/test/) ligger på samma domän.
    Varje version har därför en egen cache, märkt med sin adress, och rör aldrig den andras. */
