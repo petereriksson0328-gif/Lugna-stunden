@@ -323,6 +323,17 @@
     <p class="small" id="starcount" style="text-align:center"></p>
   </section>
 
+  <!-- LÅSSKÄRM (bara på förälderns egen telefon) -->
+  <section class="screen" id="s-lock">
+    <div style="text-align:center;padding-top:16vh">
+      <div style="font-size:3.2rem">👪</div>
+      <h2 style="margin:10px 0 4px">Lugna Stunden</h2>
+      <p class="sub">Föräldratelefon · appen är låst</p>
+      <div class="row" style="margin-top:18px"><button id="lockOpen" style="padding:14px 28px">🔓 Lås upp</button></div>
+      <p class="small" style="margin-top:22px">Här läser du in rapporterna som ditt barn skickar.</p>
+    </div>
+  </section>
+
   <!-- LUGNA-KNAPPEN -->
   <section class="screen" id="s-sos">
     <button class="ghost backbtn" data-back>← Tillbaka</button>
@@ -652,11 +663,13 @@ document.querySelectorAll('.moods button').forEach(b=>{
 
 /* ---------- Navigering ---------- */
 function go(id, isBack){
+  /* På förälderns egen telefon finns ingen barndel: allt utom föräldravyn leder till låsskärmen */
+  if(isParentPhone() && id!=='parent') id='lock';
   if(id==='parent' && !parentOpen) return;
   /* Kom ihåg var hon kom ifrån, så att "← Tillbaka" leder rätt */
   if(!isBack && id !== curScreen){ backStack.push(curScreen); if(backStack.length > 20) backStack.shift(); }
   if(id!=='parent') parentOpen=false;
-  document.body.classList.toggle('parent', id==='parent');
+  document.body.classList.toggle('parent', id==='parent' || id==='lock');
   if(id==='parent') renderParent();
   document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on', s.id==='s-'+id));
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on', b.dataset.go===id));
@@ -1129,7 +1142,7 @@ async function pinSubmit(){
 document.addEventListener('visibilitychange', ()=>{
   if(document.hidden && parentOpen) go('home');
   /* På förälderns egen telefon frågar appen efter PIN när den öppnas igen */
-  else if(!document.hidden && isParentPhone() && setupDone() && !parentOpen && !$('pinBg').classList.contains('on')) openPin();
+  else if(!document.hidden && isParentPhone() && setupDone() && !parentOpen && !$('pinBg').classList.contains('on')){ go('lock'); openPin(); }
 });
 
 document.querySelectorAll('[data-p]').forEach(b => b.onclick = ()=>{
@@ -1137,7 +1150,8 @@ document.querySelectorAll('[data-p]').forEach(b => b.onclick = ()=>{
   document.querySelectorAll('[data-p]').forEach(x => x.classList.toggle('ghost', x!==b));
   renderParent();
 });
-$('pClose').onclick = ()=> go('home');
+$('lockOpen').onclick = ()=> openPin();
+$('pClose').onclick = ()=> go(isParentPhone() ? 'lock' : 'home');
 $('pPin').onclick = ()=> openPin('new');
 $('pDiaryBtn').onclick = function(){
   const ul=$('pDiary'), show = ul.style.display==='none';
@@ -1449,8 +1463,15 @@ function renderTwo(){
       <p class="small" id="pTwoMsg" style="text-align:center;min-height:1.2em"></p>
       ${showCode ? `<div class="code">${fmtCode(code)}</div>
         <p class="small">Skriv in koden på barnets telefon under <b>🙂 Jag → Dela med min förälder</b>. Koden är nyckeln som krypterar rapporterna, så dela den inte med någon annan.</p>
-        <div class="row"><button class="ghost" id="pNewCode" style="font-size:.8rem;padding:6px 14px">Skapa ny kod</button></div>` : ''}`;
+        <div class="row"><button class="ghost" id="pNewCode" style="font-size:.8rem;padding:6px 14px">Skapa ny kod</button></div>
+        <div class="row" style="margin-top:6px"><button class="ghost" id="pToChild" style="font-size:.75rem;padding:6px 12px;color:var(--soft)">Använd som barnets telefon i stället</button></div>` : ''}`;
     $('pCodeBtn').onclick = ()=>{ showCode = !showCode; renderTwo(); };
+    $('pClose').textContent = '🔒 Lås appen';
+    let armC = false;
+    if(showCode) $('pToChild').onclick = function(){
+      if(!armC){ armC = true; this.textContent = 'Säker? Tryck igen. Då blir det här barnets telefon.'; return; }
+      store.set('role', ''); location.reload();
+    };
     $('pImportBtn').onclick = async ()=>{
       try{ const t = await navigator.clipboard.readText(); if(/LS1\./.test(t)){ await importReport(t); return; } }catch(e){}
       $('pImport').style.display = 'block'; $('pImportRow').style.display = 'flex'; $('pImport').focus();
@@ -1464,6 +1485,7 @@ function renderTwo(){
   }
   /* På barnets telefon */
   $('pSub').textContent = 'Bara för dig. Allt här kommer från den här telefonen.';
+  $('pClose').textContent = '🔒 Stäng föräldravyn';
   el.innerHTML = `<b>📱 Följ på din egen telefon</b>
     ${code ? `<p class="small">Den här telefonen är ihopkopplad med föräldratelefonen. Ditt barn skickar rapporter under <b>🙂 Jag → Dela med min förälder</b>.</p>`
            : `<p class="small">Öppna appen på din egen telefon och välj <b>Jag är förälder → Min egen telefon</b>. Skriv sedan in koden som visas där, här eller i barnets app under 🙂 Jag.</p>
@@ -1899,7 +1921,7 @@ if(IS_TEST){
 }
 
 greet(); showMsg(msgIndex); renderInsight(); renderNudge();
-if(setupDone() && isParentPhone()) setTimeout(()=> openPin(), 400);   // förälderns telefon öppnar direkt till PIN
+if(setupDone() && isParentPhone()){ go('lock', true); setTimeout(()=> openPin(), 400); }   // förälderns telefon: låsskärm och PIN direkt
 if(!setupDone()){
   /* Den som redan har använt appen slipper välkomsten */
   if(store.get('name','') || store.get('moods',[]).length || store.get('diary',[]).length) store.set('setup', 1);
