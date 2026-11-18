@@ -21,7 +21,7 @@ Rapporten är krypterad (AES-GCM med en nyckel som görs av kopplingskoden), så
 
 > Varningar kommer bara fram när hon skickar en rapport. Appen ersätter inte att hon går till en vuxen. Därför visar krisrutan alltid BRIS och 112.
 
-Din telefon frågar efter PIN varje gång appen öppnas. Har du redan använt appen på din telefon som "barn" kan du byta: öppna föräldravyn och tryck **Gör den här till föräldratelefon**.
+Din telefon har ingen barndel. Den visar en låsskärm och frågar efter PIN varje gång appen öppnas, och **🔒 Lås appen** i föräldravyn låser den igen. Valde du fel telefon finns *Använd som barnets telefon i stället* under 🔗 Kopplingskod. Har du redan använt appen på din telefon som "barn" kan du byta: öppna föräldravyn och tryck **Gör den här till föräldratelefon**.
 
 ## Innehåll
 - **Dagens tanke** – ett positivt, lugnande meddelande (samma hela dagen, med en knapp för fler)

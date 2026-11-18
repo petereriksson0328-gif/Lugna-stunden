@@ -75,7 +75,7 @@ tests/analys.test.js   test av textanalysen (node tests/analys.test.js)
 12. **Lugn musik:** mjuka toner, regn och vågor via Web Audio (offline), volym, "stäng av efter" och en knapp "Stoppa musiken" på andra skärmar. Spotify-länkar (sökningar) och egna Spotify-listor i `music` (bara länkar som börjar med `https://open.spotify.com/`).
 
 ### Två telefoner (utan server)
-- Förälderns telefon: välkomst → Jag är förälder → PIN → **Min egen telefon** (`role` = `parent`). Appen visar en kopplingskod (16 tecken, 2 sista är kontrollsumma) och frågar efter PIN vid varje start.
+- Förälderns telefon: välkomst → Jag är förälder → PIN → **Min egen telefon** (`role` = `parent`). Appen visar en kopplingskod (16 tecken, 2 sista är kontrollsumma) och frågar efter PIN vid varje start. Föräldratelefonen har ingen barndel: allt utom föräldravyn leder till en låsskärm (`s-lock`), och "🔒 Lås appen" låser.
 - Barnets telefon: koden skrivs in under Om mig → Dela med min förälder (eller i föräldravyn på barnets telefon).
 - "Skicka till min förälder" skapar en rapport (`LS1.` + base64url av IV + AES-GCM, nyckel via PBKDF2 av koden) och öppnar dela-menyn. Påminnelse på startsidan efter 7 dagar ("Inte nu" skjuter upp 2 dagar). Krisrutan har knappen "Skicka till min förälder nu".
 - Rapporten innehåller senaste 60 dagarna: moods, themelog, fblog, stars, delade dagboksinlägg med text, privata bara som datum.
